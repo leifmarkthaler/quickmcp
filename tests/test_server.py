@@ -137,12 +137,14 @@ class TestServerTransports:
         """Test stdio transport configuration."""
         run_called = False
         
-        def mock_run(self):
+        def mock_asyncio_run(coro):
             nonlocal run_called
             run_called = True
+            # Properly close the coroutine to avoid warning
+            coro.close()
         
         # Mock asyncio.run to prevent actual server start
-        monkeypatch.setattr("asyncio.run", lambda x: mock_run(simple_server))
+        monkeypatch.setattr("asyncio.run", mock_asyncio_run)
         
         simple_server.run_stdio()
         assert run_called
