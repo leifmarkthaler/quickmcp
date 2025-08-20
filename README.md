@@ -17,18 +17,37 @@ QuickMCP simplifies the process of building MCP servers by providing a decorator
 
 ## Installation
 
+QuickMCP is not yet available on PyPI. Install directly from GitHub:
+
+### Using uv (recommended)
+
 ```bash
-pip install quickmcp
+uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
 ```
 
 For SSE/HTTP transport support:
 ```bash
-pip install quickmcp[http]
+uv pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.git"
 ```
 
-For development:
+### Using pip
+
 ```bash
-pip install quickmcp[dev]
+pip install git+https://github.com/leifmarkthaler/quickmcp.git
+```
+
+For SSE/HTTP transport support:
+```bash
+pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.git"
+```
+
+### Development Installation
+
+Clone and install in editable mode:
+```bash
+git clone https://github.com/leifmarkthaler/quickmcp.git
+cd quickmcp
+uv pip install -e ".[dev]"
 ```
 
 ## Quick Start
@@ -258,7 +277,7 @@ mcp-inspector stdio -- python your_server.py
 
 ## Integration with Gleitzeit
 
-QuickMCP servers work seamlessly with [Gleitzeit](https://github.com/yourusername/gleitzeit):
+QuickMCP servers work seamlessly with [Gleitzeit](https://github.com/leifmarkthaler/gleitzeit):
 
 ```yaml
 # ~/.gleitzeit/config.yaml
@@ -317,7 +336,7 @@ MIT License - see LICENSE file for details.
 
 - [MCP Specification](https://modelcontextprotocol.io)
 - [Official MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
-- [Gleitzeit Integration](https://github.com/yourusername/gleitzeit)
+- [Gleitzeit Integration](https://github.com/leifmarkthaler/gleitzeit)
 
 ## Acknowledgments
 

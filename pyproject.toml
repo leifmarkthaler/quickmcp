@@ -52,10 +52,10 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/quickmcp"
-Documentation = "https://github.com/yourusername/quickmcp#readme"
-Repository = "https://github.com/yourusername/quickmcp"
-Issues = "https://github.com/yourusername/quickmcp/issues"
+Homepage = "https://github.com/leifmarkthaler/quickmcp"
+Documentation = "https://github.com/leifmarkthaler/quickmcp#readme"
+Repository = "https://github.com/leifmarkthaler/quickmcp"
+Issues = "https://github.com/leifmarkthaler/quickmcp/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/quickmcp"]
