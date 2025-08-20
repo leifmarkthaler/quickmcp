@@ -82,8 +82,8 @@ def create_mcp_from_object(obj: Any, server_name: Optional[str] = None, config: 
         # Class
         return factory.from_class(obj)
     elif inspect.ismodule(obj):
-        # Module
-        return factory.from_module(obj.__file__ or obj.__name__)
+        # Module - use from_module_object for already-loaded modules
+        return factory.from_module_object(obj)
     elif hasattr(obj, '__class__') and obj.__class__.__module__ != 'builtins':
         # Instance of a custom class (not built-in types)
         return factory.from_class(obj.__class__)

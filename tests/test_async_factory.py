@@ -256,8 +256,10 @@ class TestAsyncExecution:
         
         tool = server._tools["error"]
         
-        with pytest.raises(ValueError, match="Test error"):
-            await tool(x=5)
+        # The wrapper catches exceptions and returns error dict
+        result = await tool(x=5)
+        assert "error" in result
+        assert "Test error" in str(result["error"])
     
     def test_execute_sync_function(self):
         """Test that sync functions still work normally."""

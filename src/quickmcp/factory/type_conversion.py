@@ -4,10 +4,12 @@ Safe type conversion system for MCP Factory.
 
 import json
 import logging
-from typing import Any, Dict, Type, Union, get_origin, get_args, Optional
+from typing import Any, Dict, Type, Union, get_origin, get_args, Optional, _SpecialForm
 from datetime import datetime, date
 from pathlib import Path
 from decimal import Decimal
+from enum import Enum
+from dataclasses import is_dataclass, fields
 
 from .config import FactoryConfig, DEFAULT_CONFIG
 from .errors import TypeConversionError
@@ -38,8 +40,14 @@ class TypeConverter:
             TypeConversionError: If conversion fails or is unsafe
         """
         # If value is already the correct type, return as-is
-        if isinstance(value, target_type):
-            return value
+        # Skip this check for generic types which can't be used with isinstance
+        if not hasattr(target_type, '__origin__'):
+            try:
+                if isinstance(value, target_type):
+                    return value
+            except TypeError:
+                # Generic types can't be used with isinstance
+                pass
         
         # Handle None values
         if value is None:
@@ -79,6 +87,10 @@ class TypeConverter:
     def _convert_value_impl(self, value: Any, target_type: Type, parameter_name: str = None) -> Any:
         """Internal implementation of value conversion."""
         
+        # Handle Any type - pass through unchanged
+        if target_type is Any:
+            return value
+        
         # Handle basic types
         if target_type in (str, int, float, bool):
             return self._convert_basic_type(value, target_type)
@@ -91,6 +103,9 @@ class TypeConverter:
             return self._convert_dict_type(value)
         
         # Handle special types
+        elif target_type == bytes:
+            return self._convert_bytes_type(value)
+        
         elif target_type == Path:
             return self._convert_path_type(value)
         
@@ -99,6 +114,14 @@ class TypeConverter:
         
         elif target_type == Decimal:
             return self._convert_decimal_type(value)
+        
+        # Handle Enum types
+        elif isinstance(target_type, type) and issubclass(target_type, Enum):
+            return self._convert_enum_type(value, target_type)
+        
+        # Handle dataclass types
+        elif is_dataclass(target_type):
+            return self._convert_dataclass_type(value, target_type)
         
         # Handle Union types (including Optional)
         elif self._is_union_type(target_type):
@@ -128,12 +151,16 @@ class TypeConverter:
         """Convert to basic types (str, int, float, bool)."""
         
         if target_type == str:
+            if isinstance(value, bytes):
+                return value.decode('utf-8')
             return str(value)
         
         elif target_type == int:
             if isinstance(value, (int, bool)):
                 return int(value)
             elif isinstance(value, float):
+                if self.config.strict_type_conversion and not self.config.allow_type_coercion:
+                    raise TypeConversionError(f"Float to int conversion not allowed in strict mode", value, target_type)
                 if value.is_integer():
                     return int(value)
                 elif self.config.strict_type_conversion:
@@ -141,6 +168,8 @@ class TypeConverter:
                 else:
                     return int(value)  # Truncate
             elif isinstance(value, str):
+                if self.config.strict_type_conversion and not self.config.allow_type_coercion:
+                    raise TypeConversionError(f"String to int conversion not allowed in strict mode", value, target_type)
                 try:
                     return int(value)
                 except ValueError:
@@ -265,6 +294,12 @@ class TypeConverter:
                     continue
             
             raise TypeConversionError(f"Cannot parse '{value}' as {target_type.__name__}", value, target_type)
+        elif isinstance(value, (int, float)):
+            # Treat as Unix timestamp
+            dt = datetime.fromtimestamp(value)
+            if target_type == date:
+                return dt.date()
+            return dt
         else:
             raise TypeConversionError(f"Cannot convert {type(value).__name__} to {target_type.__name__}", value, target_type)
     
@@ -282,6 +317,82 @@ class TypeConverter:
         else:
             raise TypeConversionError(f"Cannot convert {type(value).__name__} to Decimal", value, Decimal)
     
+    def _convert_enum_type(self, value: Any, enum_class: Type[Enum]) -> Enum:
+        """Convert to Enum type."""
+        if isinstance(value, enum_class):
+            return value
+        elif isinstance(value, str):
+            # Try exact match first
+            try:
+                return enum_class(value)
+            except ValueError:
+                pass
+            
+            # Try case-insensitive match
+            if not self.config.strict_type_conversion:
+                for member in enum_class:
+                    if member.value.lower() == value.lower():
+                        return member
+                    if member.name.lower() == value.lower():
+                        return member
+            
+            raise TypeConversionError(
+                f"'{value}' is not a valid {enum_class.__name__}",
+                value, enum_class
+            )
+        else:
+            # Try direct conversion
+            try:
+                return enum_class(value)
+            except Exception:
+                raise TypeConversionError(
+                    f"Cannot convert {type(value).__name__} to {enum_class.__name__}",
+                    value, enum_class
+                )
+    
+    def _convert_dataclass_type(self, value: Any, dataclass_type: Type) -> Any:
+        """Convert to dataclass type."""
+        if isinstance(value, dataclass_type):
+            return value
+        elif isinstance(value, dict):
+            # Convert dict to dataclass
+            field_values = {}
+            for field in fields(dataclass_type):
+                if field.name in value:
+                    # Recursively convert field values
+                    field_values[field.name] = self.convert_value(
+                        value[field.name],
+                        field.type,
+                        field.name
+                    )
+                elif field.default is not field.default_factory:
+                    # Use default value if available
+                    field_values[field.name] = field.default
+            
+            return dataclass_type(**field_values)
+        else:
+            raise TypeConversionError(
+                f"Cannot convert {type(value).__name__} to {dataclass_type.__name__}",
+                value, dataclass_type
+            )
+    
+    def _convert_bytes_type(self, value: Any) -> bytes:
+        """Convert to bytes type."""
+        if isinstance(value, bytes):
+            return value
+        elif isinstance(value, str):
+            return value.encode('utf-8')
+        elif isinstance(value, (list, tuple)):
+            # Assume list of integers
+            return bytes(value)
+        elif isinstance(value, bytearray):
+            return bytes(value)
+        else:
+            raise TypeConversionError(
+                f"Cannot convert {type(value).__name__} to bytes",
+                value, bytes
+            )
+    
     def _is_union_type(self, target_type: Type) -> bool:
         """Check if the target type is a Union type."""
         return get_origin(target_type) is Union
@@ -295,7 +406,7 @@ class TypeConverter:
         return len(args) == 2 and type(None) in args
     
     def _convert_union_type(self, value: Any, target_type: Type, parameter_name: str = None) -> Any:
-        """Convert to Union type by trying each possibility."""
+        """Convert to Union type by trying each possibility in order."""
         args = get_args(target_type)
         
         # Handle Optional[T] specially
@@ -303,11 +414,29 @@ class TypeConverter:
             non_none_type = next(arg for arg in args if arg is not type(None))
             return self.convert_value(value, non_none_type, parameter_name)
         
-        # Try each type in the union
+        # Special handling: if value is a string that looks like a number and int comes before str,
+        # prefer the int conversion
+        value_type = type(value)
+        if value_type == str and int in args and str in args:
+            int_index = args.index(int)
+            str_index = args.index(str)
+            if int_index < str_index:
+                # Try converting to int first
+                try:
+                    return self.convert_value(value, int, parameter_name)
+                except TypeConversionError:
+                    pass
+        
+        # Check if value is already exactly one of the union types
+        if value_type in args:
+            return value
+        
+        # Otherwise, try conversions in order
         last_error = None
         for union_type in args:
             try:
-                return self.convert_value(value, union_type, parameter_name)
+                result = self.convert_value(value, union_type, parameter_name)
+                return result
             except TypeConversionError as e:
                 last_error = e
                 continue
@@ -339,6 +468,12 @@ class TypeConverter:
                 for k, v in dict_value.items()
             }
         
+        elif origin == set and args:
+            # Convert to Set[T]
+            item_type = args[0]
+            set_value = self.convert_value(value, set, parameter_name)
+            return {self.convert_value(item, item_type, f"{parameter_name}[item]") for item in set_value}
+        
         elif origin == tuple and args:
             # Convert to Tuple[T, ...]
             tuple_value = self.convert_value(value, tuple, parameter_name)
@@ -346,6 +481,13 @@ class TypeConverter:
                 return tuple(
                     self.convert_value(item, arg_type, f"{parameter_name}[{i}]")
                     for i, (item, arg_type) in enumerate(zip(tuple_value, args))
+                )
+            elif len(args) == 2 and args[1] == ...:
+                # Variable length tuple Tuple[T, ...]
+                item_type = args[0]
+                return tuple(
+                    self.convert_value(item, item_type, f"{parameter_name}[{i}]")
+                    for i, item in enumerate(tuple_value)
                 )
         
         # Fall back to converting to the origin type

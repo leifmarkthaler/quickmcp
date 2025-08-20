@@ -72,6 +72,7 @@ class ImportAnalyzer:
         'jwt': 'PyJWT',
         'bcrypt': 'bcrypt',
         'cryptography': 'cryptography',
+        'bs4': 'beautifulsoup4',
     }
     
     # Development/testing packages
@@ -152,7 +153,9 @@ class ImportAnalyzer:
         try:
             tree = ast.parse(content, filename=file_path)
         except SyntaxError as e:
-            raise ImportAnalysisError(f"Syntax error in {file_path}: {e}")
+            logger.warning(f"Syntax error in {file_path}: {e}")
+            # Return empty list for files with syntax errors
+            return []
         
         # Find all import statements
         missing_deps = []
@@ -164,6 +167,11 @@ class ImportAnalyzer:
                         missing_deps.append(missing)
             
             elif isinstance(node, ast.ImportFrom):
+                # Skip relative imports (level > 0 means relative)
+                if node.level > 0:
+                    logger.debug(f"Skipping relative import at line {node.lineno}")
+                    continue
+                    
                 if node.module:
                     missing = self._check_module(node.module, "from_import", node.lineno, lines)
                     if missing:
@@ -221,7 +229,7 @@ class ImportAnalyzer:
         )
     
     def _is_optional_import(self, lines: List[str], line_index: int) -> bool:
-        """Check if an import is inside a try/except block."""
+        """Check if an import is inside a try/except block or TYPE_CHECKING block."""
         if line_index < 0 or line_index >= len(lines):
             return False
         
@@ -229,8 +237,43 @@ class ImportAnalyzer:
         import_line = lines[line_index]
         import_indent = len(import_line) - len(import_line.lstrip())
         
-        # Look backwards for 'try:' at the same or lesser indentation
-        try_found = False
+        # Check for TYPE_CHECKING block - must be indented under it
+        in_type_checking = False
+        for i in range(line_index - 1, max(-1, line_index - 10), -1):
+            line = lines[i]
+            if not line.strip():  # Skip empty lines
+                continue
+            
+            line_indent = len(line) - len(line.lstrip())
+            
+            # Check if TYPE_CHECKING block is above us
+            if 'if TYPE_CHECKING:' in line and line_indent < import_indent:
+                in_type_checking = True
+                break
+            
+            # If we find a line at same or lesser indentation, check if we're leaving the block
+            if line_indent < import_indent and not line.strip().startswith(('import', 'from')):
+                # We've left the import block
+                break
+        
+        if in_type_checking:
+            return True
+        
+        # Check if we're in an except block
+        for i in range(line_index - 1, max(-1, line_index - 10), -1):
+            line = lines[i]
+            if not line.strip():  # Skip empty lines
+                continue
+            
+            line_indent = len(line) - len(line.lstrip())
+            
+            # If we find an except at same or lesser indentation, we're optional
+            if line_indent < import_indent and line.strip().startswith('except'):
+                return True
+        
+        # Look backwards for 'try:' at any indentation less than import
+        # This handles nested try blocks
+        try_indent = None
         for i in range(line_index - 1, max(-1, line_index - 20), -1):
             line = lines[i]
             if not line.strip():  # Skip empty lines
@@ -238,19 +281,15 @@ class ImportAnalyzer:
             
             line_indent = len(line) - len(line.lstrip())
             
-            # If we find a line at the same or lesser indentation
-            if line_indent <= import_indent:
-                if line.strip().startswith('try:'):
-                    try_found = True
-                    break
-                else:
-                    # Found other code at same level, not in a try block
-                    break
+            # Look for try: at any level less indented than the import
+            if line_indent < import_indent and line.strip().startswith('try:'):
+                try_indent = line_indent
+                break
         
-        if not try_found:
+        if try_indent is None:
             return False
         
-        # Look forwards for 'except' block at the same indentation as try (less than import)
+        # Look forwards for 'except' block at the same indentation as the found try
         for i in range(line_index + 1, min(len(lines), line_index + 20)):
             line = lines[i]
             if not line.strip():  # Skip empty lines
@@ -258,16 +297,32 @@ class ImportAnalyzer:
             
             line_indent = len(line) - len(line.lstrip())
             
-            # Look for except at the same level as the try (less indented than the import)
-            if line_indent < import_indent:
+            # Look for except at the same level as the try
+            if line_indent == try_indent:
                 if line.strip().startswith('except'):
                     return True
-                else:
-                    # Found other code at try level, not an except block
-                    break
-            # Continue looking through same-level code inside the try block
+                # Don't stop on other code at try level, as except might come later
         
         return False
+    
+    def get_install_commands(self, missing_deps: List[MissingDependency], use_uv: bool = None) -> Dict[str, str]:
+        """Get install commands for missing dependencies."""
+        import shutil
+        
+        if use_uv is None:
+            use_uv = shutil.which('uv') is not None
+        
+        commands = {}
+        for dep in missing_deps:
+            if dep.import_type == "optional":
+                key = f"optional:{dep.module}"
+            else:
+                key = dep.module
+            
+            cmd = "uv pip install" if use_uv else "pip install"
+            commands[key] = f"{cmd} {dep.suggested_install}"
+        
+        return commands
     
     def clear_cache(self):
         """Clear the analysis cache."""

@@ -58,7 +58,7 @@ def from_file(
         warn_on_code_execution=False,  # Don't warn, just work
         strict_type_conversion=False,  # Be flexible
         cache_dependency_analysis=True,  # Fast
-        cache_type_conversions=True,  # Fast
+        cache_type_hints=True,  # Fast
     )
     
     if name is None:
@@ -107,7 +107,7 @@ def from_object(obj: Any, name: Optional[str] = None) -> QuickMCPServer:
         warn_on_code_execution=False,
         strict_type_conversion=False,
         cache_dependency_analysis=True,
-        cache_type_conversions=True,
+        cache_type_hints=True,
     )
     
     return _create_from_object(obj, server_name=name, config=config)
@@ -155,7 +155,10 @@ def run(
                 func_or_file = caller_module.__file__
     
     # Determine what we're working with
-    if isinstance(func_or_file, str):
+    if func_or_file is None:
+        # Create empty server
+        app = server(name)
+    elif isinstance(func_or_file, str):
         # It's a file path
         app = from_file(func_or_file, name=name)
     elif isinstance(func_or_file, dict):

@@ -102,9 +102,11 @@ class TestServerRegistry:
     def test_registry_default_path(self):
         """Test registry with default path."""
         with patch.dict(os.environ, {"HOME": "/home/test"}):
-            registry = ServerRegistry()
-            expected_path = Path("/home/test/.quickmcp/registry.json")
-            assert str(registry.registry_path) == str(expected_path)
+            with patch("pathlib.Path.mkdir"):
+                with patch("pathlib.Path.exists", return_value=False):
+                    registry = ServerRegistry()
+                    expected_path = Path("/home/test/.quickmcp/registry.json")
+                    assert str(registry.registry_path) == str(expected_path)
     
     def test_register_server(self, tmp_path):
         """Test registering a server."""
@@ -426,24 +428,21 @@ class TestHelperFunctions:
             assert servers[1].name == "s2"
     
     @patch('builtins.print')
-    @patch('quickmcp.registry.yaml')
-    def test_export_gleitzeit_config_to_stdout(self, mock_yaml, mock_print):
+    def test_export_gleitzeit_config_to_stdout(self, mock_print):
         """Test exporting config to stdout."""
         with patch('quickmcp.registry.ServerRegistry') as MockRegistry:
             mock_instance = MagicMock()
             mock_instance.to_gleitzeit_config.return_value = {"mcp": {"servers": []}}
             MockRegistry.return_value = mock_instance
             
-            mock_yaml.dump.return_value = "mcp:\n  servers: []"
-            
-            export_gleitzeit_config()
+            with patch('yaml.dump', return_value="mcp:\n  servers: []"):
+                export_gleitzeit_config()
             
             # Should print to stdout
             mock_print.assert_called_with("mcp:\n  servers: []")
     
     @patch('builtins.print')
-    @patch('quickmcp.registry.yaml')
-    def test_export_gleitzeit_config_to_file(self, mock_yaml, mock_print, tmp_path):
+    def test_export_gleitzeit_config_to_file(self, mock_print, tmp_path):
         """Test exporting config to file."""
         output_file = tmp_path / "config.yaml"
         
@@ -452,15 +451,14 @@ class TestHelperFunctions:
             mock_instance.to_gleitzeit_config.return_value = {"mcp": {"servers": []}}
             MockRegistry.return_value = mock_instance
             
-            mock_yaml.dump.return_value = "mcp:\n  servers: []"
-            
-            export_gleitzeit_config(output_path=output_file)
-            
-            # Check file was created
-            assert output_file.exists()
-            
-            # Check print message
-            mock_print.assert_called_with(f"Exported configuration to {output_file}")
+            with patch('yaml.dump', return_value="mcp:\n  servers: []"):
+                export_gleitzeit_config(output_path=output_file)
+                
+                # Check file was created
+                assert output_file.exists()
+                
+                # Check print message
+                mock_print.assert_called_with(f"Exported configuration to {output_file}")
 
 
 class TestIntegration:
