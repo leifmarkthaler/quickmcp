@@ -49,6 +49,64 @@ class QuickMCPServer:
         self._register_handlers()
 ```
 
+### Async Function Support
+
+QuickMCP provides **full support for async functions**. The factory system automatically detects and properly wraps async functions while preserving their async nature.
+
+#### Key Async Features:
+
+1. **Automatic Detection**: Uses `inspect.iscoroutinefunction()` to detect async functions
+2. **Proper Wrapping**: Creates async wrappers that maintain coroutine behavior
+3. **Mixed Support**: Sync and async functions can coexist in the same server
+4. **Class Methods**: Both sync and async methods in classes are supported
+5. **Decorator Support**: The `@mcp_tool` decorator preserves async functions
+
+#### Async Function Wrapping Pattern:
+
+```python
+# In MCPFactory._register_function_as_tool()
+if inspect.iscoroutinefunction(func):
+    async def tool_wrapper(**kwargs):
+        # Type conversion and validation
+        converted_args = self._convert_arguments(kwargs, sig, type_hints)
+        
+        # Call the original async function
+        result = await func(**converted_args)
+        
+        # Convert result to JSON-serializable format
+        return self._convert_result(result)
+else:
+    def tool_wrapper(**kwargs):
+        # Sync function wrapper
+        # ...
+```
+
+#### Usage Examples:
+
+```python
+from quickmcp.factory import create_mcp_from_module, mcp_tool
+import asyncio
+
+# Async functions are automatically detected
+async def async_process(data: str) -> str:
+    await asyncio.sleep(0.1)  # Simulate async work
+    return f"Processed: {data}"
+
+@mcp_tool
+async def decorated_async(value: int) -> int:
+    await asyncio.sleep(0.1)
+    return value * 2
+
+# Class with mixed sync/async methods
+class AsyncProcessor:
+    async def async_method(self, x: int) -> int:
+        await asyncio.sleep(0.1)
+        return x * 2
+    
+    def sync_method(self, x: int) -> int:
+        return x * 3
+```
+
 ### Handler Registration Pattern
 
 The official MCP SDK uses a handler-based approach, NOT decorators on the Server class:
@@ -244,6 +302,70 @@ if "--info" in sys.argv:
     print(json.dumps(info))
     sys.exit(0)
 ```
+
+## MCP Factory System
+
+QuickMCP includes a powerful factory system for automatically generating MCP servers from existing Python code.
+
+### Core Factory Features
+
+1. **Module Analysis**: Automatically discovers functions, classes, and decorated code
+2. **Type Preservation**: Maintains original function signatures and type hints
+3. **Async Support**: Full support for async/await patterns
+4. **Multiple Sources**: Can create servers from modules, classes, functions, or decorated code
+
+### Factory Usage Examples
+
+```python
+from quickmcp.factory import MCPFactory, create_mcp_from_module
+
+# Create server from a Python module
+server = create_mcp_from_module("my_utils.py")
+
+# Or use the factory directly
+factory = MCPFactory(name="custom-server")
+server = factory.from_module("my_utils.py")
+
+# From a class
+server = factory.from_class(MyProcessor)
+
+# From specific functions
+functions = {"add": lambda x, y: x + y, "multiply": multiply_func}
+server = factory.from_functions(functions)
+
+# From decorated functions only
+server = factory.from_file_with_decorators("my_tools.py", decorator_name="mcp_tool")
+```
+
+### CLI Factory Command
+
+```bash
+# Generate MCP server from Python file
+mcp-factory my_utils.py --name utils-server
+
+# Filter specific functions
+mcp-factory my_utils.py --include "calculate_*" --exclude "_private"
+
+# Run with custom transport
+mcp-factory my_utils.py --transport sse --port 8080
+```
+
+### Async Factory Support
+
+The factory system fully supports async functions:
+
+```python
+# All these patterns work automatically
+async def fetch_data(url: str) -> dict: ...        # Async function
+def sync_process(data: str) -> str: ...             # Sync function
+@mcp_tool async def decorated(x: int) -> int: ...   # Decorated async
+
+class MixedProcessor:
+    async def async_method(self, data): ...         # Async method
+    def sync_method(self, data): ...                # Sync method
+```
+
+**Key Point**: The factory preserves the async nature of functions - async functions remain async, sync functions remain sync.
 
 ## Additional Resources
 

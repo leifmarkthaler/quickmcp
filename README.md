@@ -13,7 +13,9 @@ QuickMCP simplifies the process of building MCP servers by providing a decorator
 - 🛠️ **Type safety** with Pydantic models
 - 📝 **Automatic schema generation** from function signatures
 - 🔍 **Built-in logging and debugging**
-- ⚡ **Async support** for high-performance operations
+- ⚡ **Full async/await support** - async functions work seamlessly
+- 🏭 **MCP Factory** - automatically generate servers from existing Python code
+- 🔍 **Discovery system** - registry-based and network autodiscovery
 
 ## Installation
 
@@ -128,24 +130,42 @@ server.run()
 
 ### Async Operations
 
+QuickMCP has **full support for async functions**. Async functions are automatically detected and properly wrapped while preserving their async nature.
+
 ```python
 from quickmcp import QuickMCPServer
 import asyncio
+import aiohttp
 
 server = QuickMCPServer("async-example")
 
 @server.tool()
-async def fetch_data(url: str) -> dict:
-    """Fetch data from a URL."""
-    # Simulate async operation
-    await asyncio.sleep(1)
-    return {"url": url, "data": "example data"}
+async def fetch_url(url: str) -> dict:
+    """Fetch data from a URL asynchronously."""
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return {
+                "url": url,
+                "status": response.status,
+                "content": await response.text()
+            }
 
 @server.tool()
-async def process_data(data: dict) -> dict:
-    """Process data asynchronously."""
-    await asyncio.sleep(0.5)
-    return {"processed": True, **data}
+async def parallel_process(items: list) -> list:
+    """Process multiple items in parallel."""
+    async def process_item(item):
+        await asyncio.sleep(0.1)  # Simulate work
+        return f"Processed: {item}"
+    
+    # Process all items concurrently
+    results = await asyncio.gather(*[process_item(item) for item in items])
+    return results
+
+# Mix async and sync tools in the same server
+@server.tool()
+def sync_operation(x: int, y: int) -> int:
+    """Synchronous operation."""
+    return x + y
 
 server.run()
 ```
@@ -206,6 +226,115 @@ server.run(transport="sse", port=8080)
 Connect with any MCP client:
 ```bash
 mcp-client sse http://localhost:8080/sse
+```
+
+## MCP Factory - Auto-Generate Servers
+
+The MCP Factory automatically creates MCP servers from existing Python code, with full async support.
+
+### Generate from Python Modules
+
+```python
+from quickmcp.factory import create_mcp_from_module
+
+# Automatically discover all functions in a module
+server = create_mcp_from_module("my_utils.py")
+server.run()
+
+# Or use the CLI
+# mcp-factory my_utils.py --name utils-server
+```
+
+### Async Functions Work Automatically
+
+```python
+# my_async_tools.py
+import asyncio
+import aiohttp
+
+async def fetch_webpage(url: str) -> dict:
+    """Fetch webpage content asynchronously."""
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return {
+                "url": url,
+                "status": response.status,
+                "content": await response.text()
+            }
+
+async def parallel_requests(urls: list) -> list:
+    """Fetch multiple URLs in parallel."""
+    tasks = [fetch_webpage(url) for url in urls]
+    return await asyncio.gather(*tasks, return_exceptions=True)
+
+def sync_helper(text: str) -> str:
+    """Synchronous helper function."""
+    return text.upper()
+
+# Generate server automatically
+if __name__ == "__main__":
+    from quickmcp.factory import create_mcp_from_module
+    server = create_mcp_from_module(__file__)
+    server.run()
+```
+
+### Generate from Classes with Async Methods
+
+```python
+from quickmcp.factory import MCPFactory
+
+class AsyncDataProcessor:
+    """Data processor with async methods."""
+    
+    def __init__(self):
+        self.processed_count = 0
+    
+    async def process_batch(self, items: list) -> dict:
+        """Process items asynchronously."""
+        results = []
+        for item in items:
+            await asyncio.sleep(0.1)  # Simulate async work
+            results.append(f"Processed: {item}")
+        
+        self.processed_count += len(items)
+        return {
+            "results": results,
+            "total_processed": self.processed_count
+        }
+    
+    def get_stats(self) -> dict:
+        """Get processing statistics (sync method)."""
+        return {"processed_count": self.processed_count}
+
+# Generate server from class
+factory = MCPFactory()
+server = factory.from_class(AsyncDataProcessor)
+server.run()
+```
+
+### Use Decorators for Selective Exposure
+
+```python
+from quickmcp.factory import mcp_tool, create_mcp_from_module
+
+@mcp_tool
+async def exposed_async_function(data: str) -> str:
+    """This async function will be exposed as an MCP tool."""
+    await asyncio.sleep(0.1)
+    return f"Processed: {data}"
+
+@mcp_tool(name="custom_name", description="Custom async tool")
+async def another_async(value: int) -> int:
+    """Another async function with custom metadata."""
+    await asyncio.sleep(0.1)
+    return value * 2
+
+async def not_exposed(data: str) -> str:
+    """This function won't be exposed (no decorator)."""
+    return data
+
+# Only decorated functions become tools
+server = create_mcp_from_module(__file__)
 ```
 
 ## Advanced Features

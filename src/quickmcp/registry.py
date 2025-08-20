@@ -45,7 +45,7 @@ class ServerRegistry:
         if registry_path is None:
             home = Path.home()
             registry_dir = home / ".quickmcp"
-            registry_dir.mkdir(exist_ok=True)
+            registry_dir.mkdir(parents=True, exist_ok=True)
             registry_path = registry_dir / "registry.json"
         
         self.registry_path = Path(registry_path)

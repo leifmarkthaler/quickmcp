@@ -60,6 +60,7 @@ Issues = "https://github.com/leifmarkthaler/quickmcp/issues"
 
 [project.scripts]
 quickmcp = "quickmcp.cli:main"
+mcp-factory = "quickmcp.cli_factory:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/quickmcp"]

@@ -26,6 +26,12 @@ from quickmcp.registry import (
     register_server,
     list_servers,
 )
+from quickmcp.factory import (
+    MCPFactory,
+    create_mcp_from_module,
+    create_mcp_from_object,
+    mcp_tool,
+)
 
 __version__ = "0.1.0"
 
@@ -47,4 +53,8 @@ __all__ = [
     "ServerRegistration",
     "register_server",
     "list_servers",
+    "MCPFactory",
+    "create_mcp_from_module",
+    "create_mcp_from_object",
+    "mcp_tool",
 ]
