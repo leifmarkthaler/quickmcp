@@ -1,8 +1,18 @@
 # QuickMCP
 
-A lightweight, easy-to-use wrapper for creating MCP (Model Context Protocol) servers in Python, built on top of the **official MCP Python SDK**.
+The fastest way to create MCP (Model Context Protocol) servers in Python. Zero boilerplate, maximum functionality.
 
-QuickMCP simplifies the process of building MCP servers by providing a decorator-based interface and reducing boilerplate code, while still maintaining full compatibility with the MCP protocol through the official SDK.
+```python
+from quickmcp.quick import tool, run
+
+@tool
+def hello(name: str) -> str:
+    return f"Hello, {name}! 👋"
+
+run()  # Your MCP server is running!
+```
+
+QuickMCP is built on the **official MCP Python SDK** but removes all the complexity. Create powerful MCP servers with just decorators.
 
 ## Features
 
@@ -19,21 +29,44 @@ QuickMCP simplifies the process of building MCP servers by providing a decorator
 
 ## Installation
 
-QuickMCP is not yet available on PyPI. Install directly from GitHub:
+### Instant Setup (Recommended)
 
-### Prerequisites
+```bash
+# One-line install
+curl -sSL https://raw.githubusercontent.com/leifmarkthaler/quickmcp/main/install.sh | bash
+
+# Or with pip
+pip install git+https://github.com/leifmarkthaler/quickmcp.git
+```
+
+### Manual Installation
+
+#### Prerequisites
 
 QuickMCP requires the official MCP Python SDK:
 
 ```bash
-# Install the official MCP SDK first
+# Using uv (recommended - much faster)
 uv pip install mcp
-# or
+
+# Or using pip
 pip install mcp
 ```
 
-### Using uv (recommended)
+#### Using uv (recommended)
 
+[uv](https://github.com/astral-sh/uv) is a blazing-fast Python package manager that can be 10-100x faster than pip.
+
+Install uv:
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or using pip
+pip install uv
+```
+
+Then install QuickMCP:
 ```bash
 uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
 ```
@@ -43,7 +76,7 @@ For SSE/HTTP transport support:
 uv pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.git"
 ```
 
-### Using pip
+#### Using pip
 
 ```bash
 pip install git+https://github.com/leifmarkthaler/quickmcp.git
@@ -60,12 +93,42 @@ Clone and install in editable mode:
 ```bash
 git clone https://github.com/leifmarkthaler/quickmcp.git
 cd quickmcp
+
+# Using uv (recommended)
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -e ".[dev]"
+
+# Or using pip
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
 ```
 
 ## Quick Start
 
-Create a simple MCP server in just a few lines:
+### The Simplest Example (3 lines)
+
+```python
+from quickmcp.quick import tool, run
+
+@tool
+def hello(name: str) -> str:
+    return f"Hello, {name}!"
+
+run()
+```
+
+### Use Your Existing Code (1 line)
+
+```python
+from quickmcp.quick import from_file
+
+# Any Python file becomes an MCP server
+from_file("my_utils.py").run()
+```
+
+### Traditional Approach (More Control)
 
 ```python
 from quickmcp import QuickMCPServer
@@ -230,19 +293,32 @@ mcp-client sse http://localhost:8080/sse
 
 ## MCP Factory - Auto-Generate Servers
 
-The MCP Factory automatically creates MCP servers from existing Python code, with full async support.
+The MCP Factory automatically creates MCP servers from existing Python code with intelligent dependency analysis, safe type conversion, and full async support. [Full documentation →](docs/FACTORY.md)
 
-### Generate from Python Modules
+### Quick Examples
 
 ```python
 from quickmcp.factory import create_mcp_from_module
 
-# Automatically discover all functions in a module
+# Create server from any Python file
 server = create_mcp_from_module("my_utils.py")
 server.run()
 
-# Or use the CLI
+# CLI with auto-dependency detection
 # mcp-factory my_utils.py --name utils-server
+```
+
+### Smart Dependency Detection
+
+```python
+# If dependencies are missing, get helpful errors:
+$ mcp-factory my_module.py
+
+Missing dependencies detected:
+❌ Required: numpy, pandas
+⚠️  Optional: matplotlib (in try/except block)
+
+💡 Quick install: uv pip install numpy pandas  # Uses uv if available
 ```
 
 ### Async Functions Work Automatically
@@ -683,9 +759,94 @@ QuickMCP provides several helpful type definitions:
 - `Context` - Execution context for tools
 - `ServerConfig` - Server configuration
 
+## Testing
+
+QuickMCP includes a comprehensive test suite. Run tests using:
+
+```bash
+# Using the test runner script (auto-detects uv)
+./run_tests.sh
+
+# Using uv directly (fastest)
+uv run pytest tests/ -v
+
+# Using standard pytest
+pytest tests/ -v
+
+# Run specific test file
+uv run pytest tests/test_factory.py -v
+
+# Run with coverage
+uv run pytest tests/ --cov=src/quickmcp --cov-report=html
+```
+
+## Dependency Management
+
+QuickMCP uses smart dependency detection and can automatically use `uv` for faster installations:
+
+### Automatic Detection
+
+When the MCP Factory detects missing dependencies, it will:
+1. Check if `uv` is available
+2. Use `uv pip install` if available (10-100x faster)
+3. Fall back to `pip install` if not
+
+### Example with Missing Dependencies
+
+```python
+# If numpy is not installed, QuickMCP will detect it
+import numpy as np
+
+def calculate_mean(data: list) -> float:
+    """Calculate mean using numpy."""
+    return np.mean(data)
+```
+
+When running the factory:
+```bash
+$ mcp-factory my_module.py
+
+Missing dependencies detected:
+❌ Required: numpy
+
+💡 Quick install: uv pip install numpy  # or pip install if uv not available
+```
+
+### Managing Dependencies
+
+For projects using QuickMCP:
+
+```bash
+# Fast dependency installation with uv
+uv pip sync      # Install from requirements.txt
+uv pip compile   # Generate locked requirements
+
+# Or traditional pip
+pip install -r requirements.txt
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/leifmarkthaler/quickmcp.git
+cd quickmcp
+
+# Use the setup script (recommended)
+./setup.sh
+
+# Or manual setup with uv
+uv venv
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+
+# Run tests
+./run_tests.sh
+```
 
 ## License
 

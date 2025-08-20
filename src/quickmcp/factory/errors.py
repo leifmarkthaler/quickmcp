@@ -115,47 +115,62 @@ class MissingDependencyError(ImportError, FactoryError):
                 lines.append(f"    Install: {install_cmd}")
         
         # Generate installation commands
+        import shutil
+        use_uv = shutil.which('uv') is not None
+        cmd = "uv pip install" if use_uv else "pip install"
+        
         if required:
             required_installs = [dep.suggested_install or dep.module for dep in required]
-            lines.append(f"\n💡 Quick install (required): pip install {' '.join(set(required_installs))}")
+            lines.append(f"\n💡 Quick install (required): {cmd} {' '.join(set(required_installs))}")
         
         if optional and not required:
             optional_installs = [dep.suggested_install or dep.module for dep in optional]
-            lines.append(f"\n💡 Quick install (optional): pip install {' '.join(set(optional_installs))}")
+            lines.append(f"\n💡 Quick install (optional): {cmd} {' '.join(set(optional_installs))}")
         
         return "\n".join(lines)
     
-    def _get_install_command(self, dep: MissingDependency) -> str:
+    def _get_install_command(self, dep: MissingDependency, use_uv: bool = None) -> str:
         """Get the install command for a dependency."""
+        import shutil
+        
+        # Auto-detect uv if not specified
+        if use_uv is None:
+            use_uv = shutil.which('uv') is not None
+        
         pkg = dep.suggested_install or dep.module
-        if pkg != dep.module:
-            return f"pip install {pkg}"
-        else:
-            return f"pip install {dep.module}"
+        cmd = "uv pip install" if use_uv else "pip install"
+        return f"{cmd} {pkg}"
     
-    def get_install_commands(self, include_optional: bool = False, include_dev: bool = False) -> Dict[str, str]:
+    def get_install_commands(self, include_optional: bool = False, include_dev: bool = False, use_uv: bool = None) -> Dict[str, str]:
         """Get install commands for different dependency types."""
+        import shutil
+        
+        # Auto-detect uv if not specified
+        if use_uv is None:
+            use_uv = shutil.which('uv') is not None
+        
+        cmd = "uv pip install" if use_uv else "pip install"
         commands = {}
         
         # Required dependencies
         required = self.required_dependencies
         if required:
             packages = set(dep.suggested_install or dep.module for dep in required)
-            commands["required"] = f"pip install {' '.join(packages)}"
+            commands["required"] = f"{cmd} {' '.join(packages)}"
         
         # Optional dependencies
         if include_optional:
             optional = self.optional_dependencies
             if optional:
                 packages = set(dep.suggested_install or dep.module for dep in optional)
-                commands["optional"] = f"pip install {' '.join(packages)}"
+                commands["optional"] = f"{cmd} {' '.join(packages)}"
         
         # Development dependencies
         if include_dev:
             dev_deps = self.dev_dependencies
             if dev_deps:
                 packages = set(dep.suggested_install or dep.module for dep in dev_deps)
-                commands["dev"] = f"pip install {' '.join(packages)}"
+                commands["dev"] = f"{cmd} {' '.join(packages)}"
         
         return commands
 

@@ -11,12 +11,22 @@ QuickMCP is built on top of the official MCP Python SDK from Anthropic. It is **
 ### Required Dependencies
 
 ```bash
-# Install using uv (recommended)
+# Install using uv (recommended - 10-100x faster than pip)
 uv pip install mcp
 
 # Or using pip
 pip install mcp
 ```
+
+### UV Integration
+
+QuickMCP is fully integrated with `uv` for blazing-fast package management:
+
+1. **Automatic Detection**: All install commands auto-detect if `uv` is available
+2. **Fallback Support**: Gracefully falls back to `pip` if `uv` is not installed
+3. **Setup Script**: `setup.sh` automatically installs `uv` if not present
+4. **Test Runner**: `run_tests.sh` uses `uv run` for faster test execution
+5. **Dependency Errors**: Missing dependency errors show `uv pip install` commands when available
 
 The official MCP SDK package is `mcp` (not `mcp-python`, `fastmcp`, or any other variant).
 
