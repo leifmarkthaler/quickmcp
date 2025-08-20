@@ -1,8 +1,8 @@
 # QuickMCP
 
-A lightweight, easy-to-use wrapper for creating MCP (Model Context Protocol) servers in Python.
+A lightweight, easy-to-use wrapper for creating MCP (Model Context Protocol) servers in Python, built on top of the **official MCP Python SDK**.
 
-QuickMCP simplifies the process of building MCP servers by providing a decorator-based interface and reducing boilerplate code, while still maintaining full compatibility with the MCP protocol.
+QuickMCP simplifies the process of building MCP servers by providing a decorator-based interface and reducing boilerplate code, while still maintaining full compatibility with the MCP protocol through the official SDK.
 
 ## Features
 
@@ -18,6 +18,17 @@ QuickMCP simplifies the process of building MCP servers by providing a decorator
 ## Installation
 
 QuickMCP is not yet available on PyPI. Install directly from GitHub:
+
+### Prerequisites
+
+QuickMCP requires the official MCP Python SDK:
+
+```bash
+# Install the official MCP SDK first
+uv pip install mcp
+# or
+pip install mcp
+```
 
 ### Using uv (recommended)
 
@@ -337,6 +348,16 @@ MIT License - see LICENSE file for details.
 - [MCP Specification](https://modelcontextprotocol.io)
 - [Official MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
 - [Gleitzeit Integration](https://github.com/leifmarkthaler/gleitzeit)
+
+## Important Notes
+
+### Official MCP SDK Compatibility
+
+QuickMCP is specifically designed to work with the **official MCP Python SDK** (`mcp` package). It is **not** compatible with:
+- FastMCP or other third-party implementations
+- Older or experimental MCP libraries
+
+The official SDK uses a handler-based approach for registering tools, resources, and prompts. QuickMCP provides a decorator-based interface that internally manages these handlers for you.
 
 ## Acknowledgments
 
