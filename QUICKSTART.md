@@ -1,18 +1,15 @@
-# QuickMCP - 5 Minute Quickstart
+# QuickMCP - 2 Minute Quickstart
 
-Get an MCP server running in under 5 minutes!
+Get an MCP server running in under 2 minutes!
 
-## 1. Install (30 seconds)
+## 1. Install (10 seconds)
 
 ```bash
-# One-line install with automatic setup
-curl -sSL https://raw.githubusercontent.com/leifmarkthaler/quickmcp/main/install.sh | bash
+# Fast install with uv
+uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
 ```
 
-Or manually:
-```bash
-pip install git+https://github.com/leifmarkthaler/quickmcp.git
-```
+Don't have uv? `curl -LsSf https://astral.sh/uv/install.sh | sh` (it's worth it - 10-100x faster)
 
 ## 2. Create Your First Server (1 minute)
 

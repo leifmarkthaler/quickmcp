@@ -14,96 +14,49 @@ run()  # Your MCP server is running!
 
 QuickMCP is built on the **official MCP Python SDK** but removes all the complexity. Create powerful MCP servers with just decorators.
 
-## Features
+**[Quickstart](QUICKSTART.md)** • **[Getting Started](GETTING_STARTED.md)** • **[Examples](examples/)** • **[Documentation](#documentation)**
 
-- 🚀 **Simple decorator-based API** for tools, resources, and prompts
-- 📦 **Minimal boilerplate** - get started with just a few lines of code
-- 🔄 **Full MCP compatibility** - works with any MCP client
-- 🌐 **Multiple transport options** - stdio, SSE, and more coming soon
-- 🛠️ **Type safety** with Pydantic models
-- 📝 **Automatic schema generation** from function signatures
-- 🔍 **Built-in logging and debugging**
-- ⚡ **Full async/await support** - async functions work seamlessly
-- 🏭 **MCP Factory** - automatically generate servers from existing Python code
-- 🔍 **Discovery system** - registry-based and network autodiscovery
+## Why QuickMCP?
+
+- **Zero Boilerplate**: Just decorators. No classes, no handlers, no setup.
+- **Use Your Existing Code**: Any Python file becomes an MCP server instantly
+- **Async Native**: Async functions work automatically alongside sync ones
+- **Type Safe**: Full type hints and schema generation
+- **Fast**: Built on the official MCP SDK for maximum performance
+- **Simple**: If you can write Python functions, you can build an MCP server
 
 ## Installation
 
-### Instant Setup (Recommended)
-
 ```bash
-# One-line install
-curl -sSL https://raw.githubusercontent.com/leifmarkthaler/quickmcp/main/install.sh | bash
-
-# Or with pip
-pip install git+https://github.com/leifmarkthaler/quickmcp.git
-```
-
-### Manual Installation
-
-#### Prerequisites
-
-QuickMCP requires the official MCP Python SDK:
-
-```bash
-# Using uv (recommended - much faster)
-uv pip install mcp
-
-# Or using pip
-pip install mcp
-```
-
-#### Using uv (recommended)
-
-[uv](https://github.com/astral-sh/uv) is a blazing-fast Python package manager that can be 10-100x faster than pip.
-
-Install uv:
-```bash
-# macOS/Linux
+# Install uv if you don't have it (optional but recommended for 10-100x faster installs)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Or using pip
-pip install uv
-```
-
-Then install QuickMCP:
-```bash
+# Install QuickMCP
 uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
 ```
 
-For SSE/HTTP transport support:
-```bash
-uv pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.git"
-```
+That's it! You're ready to create MCP servers.
 
-#### Using pip
+<details>
+<summary>Alternative installation methods</summary>
 
+### Using pip (slower but works everywhere)
 ```bash
 pip install git+https://github.com/leifmarkthaler/quickmcp.git
 ```
 
-For SSE/HTTP transport support:
-```bash
-pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.git"
-```
-
-### Development Installation
-
-Clone and install in editable mode:
+### For development
 ```bash
 git clone https://github.com/leifmarkthaler/quickmcp.git
 cd quickmcp
-
-# Using uv (recommended)
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -e ".[dev]"
-
-# Or using pip
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
 ```
+
+### For SSE/HTTP transport
+```bash
+uv pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.git"
+```
+</details>
 
 ## Quick Start
 
@@ -851,6 +804,27 @@ uv pip install -e ".[dev]"
 ## License
 
 MIT License - see LICENSE file for details.
+
+## Full Feature Set
+
+<details>
+<summary>All features QuickMCP supports</summary>
+
+- ✅ **Tools** - Functions that LLMs can call
+- ✅ **Resources** - Data/content LLMs can access  
+- ✅ **Prompts** - Reusable prompt templates
+- ✅ **Async/Await** - Full async support
+- ✅ **Type Safety** - Automatic schema from type hints
+- ✅ **Multiple Transports** - stdio, SSE, more coming
+- ✅ **Auto-discovery** - Network and registry based
+- ✅ **Factory System** - Convert existing code instantly
+- ✅ **Configuration** - Safe, dev, and custom configs
+- ✅ **Dependency Analysis** - Smart missing package detection
+- ✅ **UV Integration** - 10-100x faster package management
+- ✅ **Error Handling** - Comprehensive error messages
+- ✅ **Testing** - Full test suite included
+- ✅ **Examples** - Many examples to learn from
+</details>
 
 ## Links
 

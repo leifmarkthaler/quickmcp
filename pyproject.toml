@@ -2,18 +2,6 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-# UV-specific configuration
-[tool.uv]
-preview = true
-dev-dependencies = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0", 
-    "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-]
-
 [project]
 name = "quickmcp"
 version = "0.1.0"
