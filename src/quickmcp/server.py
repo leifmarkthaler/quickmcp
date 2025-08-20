@@ -8,10 +8,12 @@ from typing import Optional, Dict, Any, Callable, List, Union
 from pathlib import Path
 import sys
 import json
+import inspect
 
-from mcp import Server
+from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from pydantic import BaseModel
+from mcp.types import Tool, Resource, Prompt, TextContent
 
 logger = logging.getLogger(__name__)
 
@@ -65,14 +67,158 @@ class QuickMCPServer:
         self.logger = logging.getLogger(name)
         
         # Create the underlying MCP server
-        self._server = Server(name)
+        self._server = Server(name, version=version)
         
         # Track registered components
         self._tools: Dict[str, Callable] = {}
         self._resources: Dict[str, Callable] = {}
         self._prompts: Dict[str, Callable] = {}
         
+        # Store metadata
+        self._tool_metadata: Dict[str, Dict[str, Any]] = {}
+        self._resource_metadata: Dict[str, Dict[str, Any]] = {}
+        self._prompt_metadata: Dict[str, Dict[str, Any]] = {}
+        
+        # Register handlers with the MCP server
+        self._register_handlers()
+        
         self.logger.info(f"Initialized QuickMCP server: {name} v{version}")
+    
+    def _register_handlers(self):
+        """Register the request handlers with the MCP server."""
+        
+        @self._server.list_tools()
+        async def list_tools():
+            """List available tools."""
+            tools = []
+            for tool_name, func in self._tools.items():
+                metadata = self._tool_metadata.get(tool_name, {})
+                tools.append(Tool(
+                    name=tool_name,
+                    description=metadata.get("description", ""),
+                    inputSchema=metadata.get("schema", {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    })
+                ))
+            return tools
+        
+        @self._server.call_tool()
+        async def call_tool(name: str, arguments: dict):
+            """Execute a tool."""
+            if name not in self._tools:
+                raise ValueError(f"Tool {name} not found")
+            
+            func = self._tools[name]
+            
+            # Execute the function
+            if asyncio.iscoroutinefunction(func):
+                result = await func(**arguments)
+            else:
+                result = func(**arguments)
+            
+            # Return as TextContent
+            return [TextContent(
+                type="text",
+                text=json.dumps(result) if not isinstance(result, str) else result
+            )]
+        
+        @self._server.list_resources()
+        async def list_resources():
+            """List available resources."""
+            resources = []
+            for uri_template, func in self._resources.items():
+                metadata = self._resource_metadata.get(uri_template, {})
+                resources.append(Resource(
+                    uri=uri_template,
+                    name=metadata.get("name", func.__name__),
+                    description=metadata.get("description", ""),
+                    mimeType=metadata.get("mime_type", "text/plain")
+                ))
+            return resources
+        
+        @self._server.read_resource()
+        async def read_resource(uri: str):
+            """Read a resource."""
+            # Find matching resource
+            for uri_template, func in self._resources.items():
+                # Simple template matching (replace {param} with actual values)
+                # This is a simplified version - production code would need proper URI template matching
+                if self._uri_matches(uri, uri_template):
+                    params = self._extract_params(uri, uri_template)
+                    
+                    if asyncio.iscoroutinefunction(func):
+                        content = await func(**params)
+                    else:
+                        content = func(**params)
+                    
+                    metadata = self._resource_metadata.get(uri_template, {})
+                    return TextContent(
+                        type="text",
+                        text=content,
+                        mimeType=metadata.get("mime_type", "text/plain")
+                    )
+            
+            raise ValueError(f"Resource {uri} not found")
+        
+        @self._server.list_prompts()
+        async def list_prompts():
+            """List available prompts."""
+            prompts = []
+            for prompt_name, func in self._prompts.items():
+                metadata = self._prompt_metadata.get(prompt_name, {})
+                prompts.append(Prompt(
+                    name=prompt_name,
+                    description=metadata.get("description", ""),
+                    arguments=metadata.get("arguments", [])
+                ))
+            return prompts
+        
+        @self._server.get_prompt()
+        async def get_prompt(name: str, arguments: dict):
+            """Get a prompt."""
+            if name not in self._prompts:
+                raise ValueError(f"Prompt {name} not found")
+            
+            func = self._prompts[name]
+            
+            if asyncio.iscoroutinefunction(func):
+                content = await func(**arguments)
+            else:
+                content = func(**arguments)
+            
+            return TextContent(
+                type="text",
+                text=content
+            )
+    
+    def _uri_matches(self, uri: str, template: str) -> bool:
+        """Check if a URI matches a template pattern."""
+        # Simple implementation - just check if the base matches
+        # A full implementation would parse the template properly
+        import re
+        pattern = re.sub(r'\{[^}]+\}', r'[^/]+', template)
+        return bool(re.match(f"^{pattern}$", uri))
+    
+    def _extract_params(self, uri: str, template: str) -> Dict[str, str]:
+        """Extract parameters from a URI based on a template."""
+        # Simple implementation
+        import re
+        
+        # Find parameter names in template
+        param_names = re.findall(r'\{([^}]+)\}', template)
+        
+        # Create regex pattern from template
+        pattern = template
+        for param_name in param_names:
+            pattern = pattern.replace(f"{{{param_name}}}", r'([^/]+)')
+        
+        # Extract values
+        match = re.match(f"^{pattern}$", uri)
+        if match:
+            return dict(zip(param_names, match.groups()))
+        return {}
     
     def tool(
         self,
@@ -103,18 +249,20 @@ class QuickMCPServer:
             tool_name = name or func.__name__
             tool_desc = description or (func.__doc__ or "").strip()
             
-            # Register with the MCP server
-            wrapped = self._server.tool(
-                name=tool_name,
-                description=tool_desc,
-                schema=schema
-            )(func)
+            # Generate schema from function signature if not provided
+            tool_schema = schema
+            if tool_schema is None:
+                tool_schema = self._generate_schema_from_function(func)
             
             # Track in our registry
-            self._tools[tool_name] = wrapped
+            self._tools[tool_name] = func
+            self._tool_metadata[tool_name] = {
+                "description": tool_desc,
+                "schema": tool_schema
+            }
             self.logger.debug(f"Registered tool: {tool_name}")
             
-            return wrapped
+            return func
         
         return decorator
     
@@ -146,19 +294,16 @@ class QuickMCPServer:
             resource_name = name or func.__name__
             resource_desc = description or (func.__doc__ or "").strip()
             
-            # Register with the MCP server
-            wrapped = self._server.resource(
-                uri_template=uri_template,
-                name=resource_name,
-                description=resource_desc,
-                mime_type=mime_type
-            )(func)
-            
             # Track in our registry
-            self._resources[uri_template] = wrapped
+            self._resources[uri_template] = func
+            self._resource_metadata[uri_template] = {
+                "name": resource_name,
+                "description": resource_desc,
+                "mime_type": mime_type
+            }
             self.logger.debug(f"Registered resource: {uri_template}")
             
-            return wrapped
+            return func
         
         return decorator
     
@@ -188,20 +333,74 @@ class QuickMCPServer:
             prompt_name = name or func.__name__
             prompt_desc = description or (func.__doc__ or "").strip()
             
-            # Register with the MCP server
-            wrapped = self._server.prompt(
-                name=prompt_name,
-                description=prompt_desc,
-                arguments=arguments
-            )(func)
+            # Generate arguments from function signature if not provided
+            prompt_arguments = arguments
+            if prompt_arguments is None:
+                prompt_arguments = self._generate_arguments_from_function(func)
             
             # Track in our registry
-            self._prompts[prompt_name] = wrapped
+            self._prompts[prompt_name] = func
+            self._prompt_metadata[prompt_name] = {
+                "description": prompt_desc,
+                "arguments": prompt_arguments
+            }
             self.logger.debug(f"Registered prompt: {prompt_name}")
             
-            return wrapped
+            return func
         
         return decorator
+    
+    def _generate_schema_from_function(self, func: Callable) -> Dict[str, Any]:
+        """Generate JSON schema from function signature."""
+        sig = inspect.signature(func)
+        properties = {}
+        required = []
+        
+        for param_name, param in sig.parameters.items():
+            if param_name == "self":
+                continue
+            
+            # Basic type mapping
+            param_type = "string"  # default
+            if param.annotation != inspect.Parameter.empty:
+                if param.annotation == int:
+                    param_type = "integer"
+                elif param.annotation == float:
+                    param_type = "number"
+                elif param.annotation == bool:
+                    param_type = "boolean"
+                elif param.annotation == list:
+                    param_type = "array"
+                elif param.annotation == dict:
+                    param_type = "object"
+            
+            properties[param_name] = {"type": param_type}
+            
+            if param.default == inspect.Parameter.empty:
+                required.append(param_name)
+        
+        return {
+            "type": "object",
+            "properties": properties,
+            "required": required
+        }
+    
+    def _generate_arguments_from_function(self, func: Callable) -> List[Dict[str, Any]]:
+        """Generate argument list from function signature."""
+        sig = inspect.signature(func)
+        arguments = []
+        
+        for param_name, param in sig.parameters.items():
+            if param_name == "self":
+                continue
+            
+            arg = {
+                "name": param_name,
+                "required": param.default == inspect.Parameter.empty
+            }
+            arguments.append(arg)
+        
+        return arguments
     
     def add_tool_from_function(
         self,
@@ -220,12 +419,12 @@ class QuickMCPServer:
         tool_name = name or func.__name__
         tool_desc = description or (func.__doc__ or "").strip()
         
-        wrapped = self._server.tool(
-            name=tool_name,
-            description=tool_desc
-        )(func)
+        self._tools[tool_name] = func
+        self._tool_metadata[tool_name] = {
+            "description": tool_desc,
+            "schema": self._generate_schema_from_function(func)
+        }
         
-        self._tools[tool_name] = wrapped
         self.logger.info(f"Added tool from function: {tool_name}")
     
     def list_tools(self) -> List[str]:
@@ -298,7 +497,12 @@ class QuickMCPServer:
     def run_stdio(self) -> None:
         """Run the server with stdio transport."""
         self.logger.info("Running with stdio transport")
-        asyncio.run(stdio_server(self._server).run())
+        
+        async def run_async():
+            async with stdio_server(self._server) as transport:
+                await transport.run()
+        
+        asyncio.run(run_async())
     
     def run_sse(self, host: str = "localhost", port: int = 8000, **kwargs) -> None:
         """
