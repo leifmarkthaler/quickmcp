@@ -20,6 +20,12 @@ from quickmcp.autodiscovery import (
     discover_servers,
     ServerInfo,
 )
+from quickmcp.registry import (
+    ServerRegistry,
+    ServerRegistration,
+    register_server,
+    list_servers,
+)
 
 __version__ = "0.1.0"
 
@@ -37,4 +43,8 @@ __all__ = [
     "DiscoveryBroadcaster",
     "discover_servers",
     "ServerInfo",
+    "ServerRegistry",
+    "ServerRegistration",
+    "register_server",
+    "list_servers",
 ]

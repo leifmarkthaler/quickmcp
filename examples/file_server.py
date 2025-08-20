@@ -629,31 +629,10 @@ def main():
     if args.no_discovery:
         server.enable_autodiscovery = False
     
-    # Print server info
-    print("=" * 60)
-    print("QuickMCP File Server")
-    print("=" * 60)
-    print(f"Base directory: {base_dir}")
-    print(f"Max file size: {format_size(MAX_FILE_SIZE)}")
-    print(f"Transport: {args.transport}")
+    # Run server - QuickMCP handles logging to stderr automatically
     if args.transport == "sse":
-        print(f"Port: {args.port}")
-    print(f"Autodiscovery: {'enabled' if server.enable_autodiscovery else 'disabled'}")
-    print("=" * 60)
-    print("\nAvailable tools:")
-    for tool in server.list_tools():
-        print(f"  - {tool}")
-    print("\nAvailable resources:")
-    for resource in server.list_resources():
-        print(f"  - {resource}")
-    print("=" * 60)
-    
-    # Run server
-    if args.transport == "sse":
-        print(f"\nStarting SSE server on http://localhost:{args.port}")
         server.run(transport="sse", port=args.port)
     else:
-        print("\nStarting stdio server...")
         server.run(transport="stdio")
 
 

@@ -286,30 +286,78 @@ python your_server.py --transport sse --port 8080
 mcp-inspector stdio -- python your_server.py
 ```
 
-## Network Autodiscovery
+## Discovery and Registration
 
-QuickMCP includes built-in network autodiscovery, allowing servers to be automatically discovered by Gleitzeit and other MCP clients on the local network.
+QuickMCP provides comprehensive discovery mechanisms for both local and network-based MCP servers, making it easy to integrate with Gleitzeit and other MCP clients.
 
-### Autodiscovery Features
+### Overview
 
-- 🔍 **Automatic broadcasting** - Servers announce themselves via UDP multicast
-- 🌐 **Zero configuration** - Works out of the box on local networks
-- 📡 **Multiple transports** - Supports stdio, SSE, and HTTP servers
-- 🔄 **Heartbeat mechanism** - Servers send periodic announcements
-- 📊 **Capability broadcasting** - Advertises available tools, resources, and prompts
+QuickMCP supports two discovery approaches:
+- **Registry-based discovery** for stdio servers (launched as child processes)
+- **Network autodiscovery** for SSE/HTTP servers (running as network services)
 
-### Enabling Autodiscovery
+### Server Registry (for stdio servers)
 
-Autodiscovery is enabled by default. Servers automatically broadcast their presence:
+The server registry allows you to register QuickMCP servers that can be launched via stdio transport.
+
+#### Registering Servers
+
+```bash
+# Register a server with the CLI
+quickmcp register my-server "python my_server.py" \
+    --description "My custom MCP server" \
+    --tool-prefix "my."
+
+# Or register programmatically
+from quickmcp import register_server
+
+register_server(
+    name="my-server",
+    command=["python", "my_server.py"],
+    description="My custom MCP server",
+    tool_prefix="my."
+)
+```
+
+#### Listing Registered Servers
+
+```bash
+# List all registered servers
+quickmcp list
+
+# Or programmatically
+from quickmcp import list_servers
+
+for server in list_servers():
+    print(f"{server.name}: {server.description}")
+```
+
+#### Auto-Discovery in Filesystem
+
+QuickMCP can automatically discover servers in your filesystem:
+
+```bash
+# Discover servers in current directory and common locations
+quickmcp discover --scan-filesystem
+
+# Discover and auto-register found servers
+quickmcp discover --scan-filesystem --auto-register
+
+# Specify custom search paths
+quickmcp discover --scan-filesystem --paths ./my-servers ~/mcp-servers
+```
+
+### Network Autodiscovery (for SSE/HTTP servers)
+
+Network servers automatically broadcast their presence via UDP multicast when running with SSE or HTTP transport.
+
+#### Server-Side (Automatic)
 
 ```python
 from quickmcp import QuickMCPServer
 
-# Autodiscovery is enabled by default
+# Network servers automatically broadcast when running
 server = QuickMCPServer("my-server")
-
-# Disable if needed
-server = QuickMCPServer("my-server", enable_autodiscovery=False)
 
 # Add discovery metadata
 server = QuickMCPServer(
@@ -320,74 +368,166 @@ server = QuickMCPServer(
         "tags": ["ai", "tools"]
     }
 )
+
+# Run as SSE server (autodiscovery enabled automatically)
+server.run(transport="sse", port=8080)
 ```
 
-### Discovering Servers
-
-Use the discovery client to find QuickMCP servers:
+#### Client-Side Discovery
 
 ```bash
-# Discover servers once
-python -m quickmcp.autodiscovery listen
+# Discover network servers
+quickmcp discover --scan-network
 
-# Continuously monitor for servers
-python examples/discover_servers.py continuous
-
-# Export discovered servers to JSON
-python examples/discover_servers.py export --output servers.json
+# Discover with custom timeout
+quickmcp discover --scan-network --timeout 10
 ```
 
-### Programmatic Discovery
+Or programmatically:
 
 ```python
 import asyncio
 from quickmcp import discover_servers
 
-async def find_servers():
+async def find_network_servers():
     servers = await discover_servers(timeout=5.0)
     for server in servers:
-        print(f"Found: {server.name} ({server.transport})")
-        if server.transport == "sse":
-            print(f"  URL: http://{server.host}:{server.port}")
+        print(f"Found: {server.name} at {server.host}:{server.port}")
 
-asyncio.run(find_servers())
+asyncio.run(find_network_servers())
+```
+
+### QuickMCP CLI
+
+The QuickMCP CLI provides comprehensive server management:
+
+```bash
+# Register a server
+quickmcp register <name> <command> [options]
+
+# Unregister a server
+quickmcp unregister <name>
+
+# List registered servers
+quickmcp list
+
+# Show server information
+quickmcp info <name>
+
+# Discover servers (filesystem and/or network)
+quickmcp discover [--scan-filesystem] [--scan-network]
+
+# Export configuration for Gleitzeit
+quickmcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
+```
+
+### Server Metadata
+
+QuickMCP servers can provide metadata via the `--info` flag:
+
+```bash
+# Get server information
+python my_server.py --info
+```
+
+This returns JSON with server details:
+```json
+{
+  "name": "my-server",
+  "version": "1.0.0",
+  "description": "My custom server",
+  "capabilities": {
+    "tools": ["tool1", "tool2"],
+    "resources": ["resource1"],
+    "prompts": ["prompt1"]
+  }
+}
 ```
 
 ## Integration with Gleitzeit
 
 QuickMCP servers work seamlessly with [Gleitzeit](https://github.com/leifmarkthaler/gleitzeit):
 
+### Automatic Configuration Export
+
+QuickMCP can export your registered servers directly to Gleitzeit configuration:
+
+```bash
+# Export all registered servers to Gleitzeit config
+quickmcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
+
+# The generated config will look like:
+```
+```yaml
+mcp:
+  auto_discover: true
+  servers:
+    - name: "my-server"
+      connection_type: "stdio"
+      command: ["python", "my_server.py"]
+      tool_prefix: "my."
+      auto_start: true
+```
+
 ### Manual Configuration
+
+You can also manually configure QuickMCP servers in Gleitzeit:
 
 ```yaml
 # ~/.gleitzeit/config.yaml
 mcp:
   servers:
+    # Stdio server (launched as child process)
     - name: "my-quickmcp-server"
       connection_type: "stdio"
-      command: ["python", "my_server.py"]
+      command: ["python", "path/to/my_server.py"]
+      working_dir: "${HOME}/my-servers"
       tool_prefix: "my."
-```
-
-Or for SSE servers:
-```yaml
-mcp:
-  servers:
-    - name: "my-quickmcp-server"
+      auto_start: true
+    
+    # SSE server (network connection)
+    - name: "my-sse-server"
       connection_type: "sse"
       url: "http://localhost:8080/sse"
-      tool_prefix: "my."
+      tool_prefix: "sse."
+      auto_start: false  # Don't launch, just connect
 ```
 
-### Autodiscovery with Gleitzeit
+### Discovery Workflow
 
-When autodiscovery is enabled, Gleitzeit can automatically find and connect to QuickMCP servers on the network without manual configuration. Servers broadcast:
+1. **Register your servers** with QuickMCP:
+   ```bash
+   quickmcp register my-server "python my_server.py" --tool-prefix "my."
+   ```
 
-- Server name and version
-- Transport type (stdio/sse/http)
-- Connection details (host, port)
-- Available capabilities (tools, resources, prompts)
-- Custom metadata
+2. **Export to Gleitzeit**:
+   ```bash
+   quickmcp export > ~/.gleitzeit/mcp_servers.yaml
+   ```
+
+3. **Use in Gleitzeit workflows**:
+   ```yaml
+   tasks:
+     - name: "Use MCP tool"
+       type: mcp
+       provider: my-server
+       tool: my.some_tool
+       arguments:
+         param: value
+   ```
+
+### Network Server Discovery
+
+For SSE/HTTP servers, Gleitzeit can discover them automatically via UDP multicast:
+
+```python
+# Your QuickMCP server broadcasts automatically
+server = QuickMCPServer("my-server")
+server.run(transport="sse", port=8080)  # Broadcasts on network
+
+# Gleitzeit can discover it
+# (when auto_discover: true in config)
+```
 
 ## API Reference
 

@@ -10,10 +10,10 @@ import sys
 import json
 import inspect
 
-from mcp.server import Server
+from mcp.server import Server, InitializationOptions
 from mcp.server.stdio import stdio_server
 from pydantic import BaseModel
-from mcp.types import Tool, Resource, Prompt, TextContent
+from mcp.types import Tool, Resource, Prompt, TextContent, ServerCapabilities
 
 from .autodiscovery import AutoDiscovery
 
@@ -65,10 +65,11 @@ class QuickMCPServer:
         self.version = version
         self.description = description or f"{name} MCP Server"
         
-        # Set up logging
+        # Set up logging - always use stderr to avoid interfering with stdio transport
         logging.basicConfig(
             level=getattr(logging, log_level.upper()),
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            stream=sys.stderr
         )
         self.logger = logging.getLogger(name)
         
@@ -536,13 +537,30 @@ class QuickMCPServer:
             server.run(transport="sse", port=8080)
             ```
         """
+        # Check for --info flag (for discovery)
+        if "--info" in sys.argv:
+            info = {
+                "name": self.name,
+                "version": self.version,
+                "description": self.description,
+                "capabilities": {
+                    "tools": self.list_tools(),
+                    "resources": self.list_resources(),
+                    "prompts": self.list_prompts()
+                },
+                "metadata": self.discovery_metadata
+            }
+            print(json.dumps(info))
+            sys.exit(0)
+        
         self.logger.info(f"Starting {self.name} server with {transport} transport")
         self.logger.info(f"Registered {len(self._tools)} tools, "
                         f"{len(self._resources)} resources, "
                         f"{len(self._prompts)} prompts")
         
-        # Start autodiscovery if enabled
-        self.start_autodiscovery(transport=transport, host=host, port=port)
+        # Start autodiscovery if enabled (but not for stdio transport)
+        if transport != "stdio":
+            self.start_autodiscovery(transport=transport, host=host, port=port)
         
         try:
             if transport == "stdio":
@@ -559,11 +577,28 @@ class QuickMCPServer:
     
     def run_stdio(self) -> None:
         """Run the server with stdio transport."""
-        self.logger.info("Running with stdio transport")
+        # Disable logging for stdio transport to avoid interfering with JSON-RPC
+        logging.getLogger().setLevel(logging.CRITICAL)
         
         async def run_async():
+            # Create initialization options
+            init_options = InitializationOptions(
+                server_name=self.name,
+                server_version=self.version,
+                capabilities=ServerCapabilities(
+                    tools={"listTools": True, "callTool": True} if self._tools else {},
+                    resources={"listResources": True, "readResource": True} if self._resources else {},
+                    prompts={"listPrompts": True, "getPrompt": True} if self._prompts else {}
+                ),
+                instructions=self.description
+            )
+            
             async with stdio_server() as (read_stream, write_stream):
-                await self._server.run(read_stream, write_stream)
+                await self._server.run(
+                    read_stream=read_stream,
+                    write_stream=write_stream,
+                    initialization_options=init_options
+                )
         
         asyncio.run(run_async())
     

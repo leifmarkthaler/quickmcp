@@ -27,6 +27,9 @@ QuickMCP provides a decorator-based API that internally uses the official SDK's 
 1. **Decorators** (`@server.tool()`, `@server.resource()`, `@server.prompt()`) - Simple API for users
 2. **Handler Registration** - QuickMCP registers handlers with the MCP Server internally
 3. **Official SDK Server** - The underlying `mcp.server.Server` handles the protocol
+4. **Discovery System** - Two-tier discovery for stdio and network servers
+5. **Registry** - Local registry for stdio server management
+6. **CLI** - Command-line interface for server management
 
 ## Key Implementation Details
 
@@ -99,12 +102,32 @@ pytest tests/ -v
 ### stdio Transport (Default)
 ```python
 async def run_stdio(self):
-    async with stdio_server(self._server) as transport:
-        await transport.run()
+    # Create initialization options
+    init_options = InitializationOptions(
+        server_name=self.name,
+        server_version=self.version,
+        capabilities=ServerCapabilities(...),
+        instructions=self.description
+    )
+    
+    # Run with stdio transport
+    async with stdio_server() as (read_stream, write_stream):
+        await self._server.run(
+            read_stream=read_stream,
+            write_stream=write_stream,
+            initialization_options=init_options
+        )
 ```
+
+**Important**: For stdio transport:
+- Logging is automatically redirected to stderr
+- Autodiscovery is disabled (not applicable for child processes)
+- Server responds to `--info` flag for metadata discovery
 
 ### SSE Transport
 Requires additional dependencies: `pip install starlette uvicorn`
+- Autodiscovery via UDP multicast is enabled
+- Server broadcasts on network automatically
 
 ## Common Pitfalls to Avoid
 
@@ -168,8 +191,63 @@ When adding features:
 3. Are we returning the correct MCP types?
 4. Is the async/await pattern used correctly?
 
+## Discovery System
+
+QuickMCP uses a two-tier discovery system:
+
+### 1. Registry-based Discovery (stdio servers)
+- Servers are registered in `~/.quickmcp/registry.json`
+- Can be discovered via filesystem scanning
+- Exported to Gleitzeit-compatible configuration
+- Managed via CLI: `quickmcp register/list/discover`
+
+### 2. Network Discovery (SSE/HTTP servers)
+- Servers broadcast via UDP multicast (239.255.41.42:42424)
+- Automatic discovery for network-based servers
+- Only enabled for non-stdio transports
+
+## CLI Commands
+
+QuickMCP provides a CLI for server management:
+
+```bash
+# Server management
+quickmcp register <name> <command>  # Register a server
+quickmcp unregister <name>          # Remove a server
+quickmcp list                       # List registered servers
+quickmcp info <name>                # Show server details
+
+# Discovery
+quickmcp discover --scan-filesystem  # Find servers in filesystem
+quickmcp discover --scan-network    # Find network servers
+
+# Export
+quickmcp export --format yaml       # Export for Gleitzeit
+```
+
+## Server Metadata Protocol
+
+Servers respond to `--info` flag with JSON metadata:
+
+```python
+if "--info" in sys.argv:
+    info = {
+        "name": self.name,
+        "version": self.version,
+        "description": self.description,
+        "capabilities": {
+            "tools": self.list_tools(),
+            "resources": self.list_resources(),
+            "prompts": self.list_prompts()
+        }
+    }
+    print(json.dumps(info))
+    sys.exit(0)
+```
+
 ## Additional Resources
 
 - [Official MCP Documentation](https://modelcontextprotocol.io)
 - [MCP Python SDK Repository](https://github.com/modelcontextprotocol/python-sdk)
 - [QuickMCP Repository](https://github.com/leifmarkthaler/quickmcp)
+- [Gleitzeit Integration](https://github.com/leifmarkthaler/gleitzeit)

@@ -234,12 +234,6 @@ Please provide:
 # ====================
 
 if __name__ == "__main__":
-    # Print server info
-    print(f"Starting {server.name} v{server.version}")
-    print(f"Tools: {', '.join(server.list_tools())}")
-    print(f"Resources: {', '.join(server.list_resources())}")
-    print(f"Prompts: {', '.join(server.list_prompts())}")
-    print("-" * 50)
-    
     # Run the server (defaults to stdio transport)
+    # QuickMCP handles logging to stderr automatically
     server.run()

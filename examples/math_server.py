@@ -537,17 +537,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    print("=" * 60)
-    print("QuickMCP Math Server")
-    print("=" * 60)
-    print(f"Tools: {len(server.list_tools())}")
-    for tool in server.list_tools():
-        print(f"  - {tool}")
-    print(f"\nResources: {len(server.list_resources())}")
-    for resource in server.list_resources():
-        print(f"  - {resource}")
-    print("=" * 60)
-    
+    # Run server - QuickMCP handles logging to stderr automatically
     if args.transport == "sse":
         server.run(transport="sse", port=args.port)
     else:
