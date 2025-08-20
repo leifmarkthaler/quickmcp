@@ -562,8 +562,8 @@ class QuickMCPServer:
         self.logger.info("Running with stdio transport")
         
         async def run_async():
-            async with stdio_server(self._server) as transport:
-                await transport.run()
+            async with stdio_server() as (read_stream, write_stream):
+                await self._server.run(read_stream, write_stream)
         
         asyncio.run(run_async())
     
