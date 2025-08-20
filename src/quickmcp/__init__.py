@@ -13,6 +13,13 @@ from quickmcp.types import (
     PromptMessage,
     Context,
 )
+from quickmcp.autodiscovery import (
+    AutoDiscovery,
+    DiscoveryListener,
+    DiscoveryBroadcaster,
+    discover_servers,
+    ServerInfo,
+)
 
 __version__ = "0.1.0"
 
@@ -25,4 +32,9 @@ __all__ = [
     "ResourceContent",
     "PromptMessage",
     "Context",
+    "AutoDiscovery",
+    "DiscoveryListener",
+    "DiscoveryBroadcaster",
+    "discover_servers",
+    "ServerInfo",
 ]

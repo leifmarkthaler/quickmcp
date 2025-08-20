@@ -286,9 +286,78 @@ python your_server.py --transport sse --port 8080
 mcp-inspector stdio -- python your_server.py
 ```
 
+## Network Autodiscovery
+
+QuickMCP includes built-in network autodiscovery, allowing servers to be automatically discovered by Gleitzeit and other MCP clients on the local network.
+
+### Autodiscovery Features
+
+- 🔍 **Automatic broadcasting** - Servers announce themselves via UDP multicast
+- 🌐 **Zero configuration** - Works out of the box on local networks
+- 📡 **Multiple transports** - Supports stdio, SSE, and HTTP servers
+- 🔄 **Heartbeat mechanism** - Servers send periodic announcements
+- 📊 **Capability broadcasting** - Advertises available tools, resources, and prompts
+
+### Enabling Autodiscovery
+
+Autodiscovery is enabled by default. Servers automatically broadcast their presence:
+
+```python
+from quickmcp import QuickMCPServer
+
+# Autodiscovery is enabled by default
+server = QuickMCPServer("my-server")
+
+# Disable if needed
+server = QuickMCPServer("my-server", enable_autodiscovery=False)
+
+# Add discovery metadata
+server = QuickMCPServer(
+    "my-server",
+    discovery_metadata={
+        "author": "Your Name",
+        "category": "utilities",
+        "tags": ["ai", "tools"]
+    }
+)
+```
+
+### Discovering Servers
+
+Use the discovery client to find QuickMCP servers:
+
+```bash
+# Discover servers once
+python -m quickmcp.autodiscovery listen
+
+# Continuously monitor for servers
+python examples/discover_servers.py continuous
+
+# Export discovered servers to JSON
+python examples/discover_servers.py export --output servers.json
+```
+
+### Programmatic Discovery
+
+```python
+import asyncio
+from quickmcp import discover_servers
+
+async def find_servers():
+    servers = await discover_servers(timeout=5.0)
+    for server in servers:
+        print(f"Found: {server.name} ({server.transport})")
+        if server.transport == "sse":
+            print(f"  URL: http://{server.host}:{server.port}")
+
+asyncio.run(find_servers())
+```
+
 ## Integration with Gleitzeit
 
 QuickMCP servers work seamlessly with [Gleitzeit](https://github.com/leifmarkthaler/gleitzeit):
+
+### Manual Configuration
 
 ```yaml
 # ~/.gleitzeit/config.yaml
@@ -309,6 +378,16 @@ mcp:
       url: "http://localhost:8080/sse"
       tool_prefix: "my."
 ```
+
+### Autodiscovery with Gleitzeit
+
+When autodiscovery is enabled, Gleitzeit can automatically find and connect to QuickMCP servers on the network without manual configuration. Servers broadcast:
+
+- Server name and version
+- Transport type (stdio/sse/http)
+- Connection details (host, port)
+- Available capabilities (tools, resources, prompts)
+- Custom metadata
 
 ## API Reference
 

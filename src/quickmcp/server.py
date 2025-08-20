@@ -15,6 +15,8 @@ from mcp.server.stdio import stdio_server
 from pydantic import BaseModel
 from mcp.types import Tool, Resource, Prompt, TextContent
 
+from .autodiscovery import AutoDiscovery
+
 logger = logging.getLogger(__name__)
 
 
@@ -45,6 +47,8 @@ class QuickMCPServer:
         version: str = "1.0.0",
         description: Optional[str] = None,
         log_level: str = "INFO",
+        enable_autodiscovery: bool = True,
+        discovery_metadata: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize a QuickMCP server.
@@ -54,6 +58,8 @@ class QuickMCPServer:
             version: Server version
             description: Optional server description
             log_level: Logging level (DEBUG, INFO, WARNING, ERROR)
+            enable_autodiscovery: Enable network autodiscovery
+            discovery_metadata: Additional metadata for discovery
         """
         self.name = name
         self.version = version
@@ -81,6 +87,11 @@ class QuickMCPServer:
         
         # Register handlers with the MCP server
         self._register_handlers()
+        
+        # Autodiscovery setup
+        self.enable_autodiscovery = enable_autodiscovery
+        self.discovery_metadata = discovery_metadata or {}
+        self._autodiscovery: Optional[AutoDiscovery] = None
         
         self.logger.info(f"Initialized QuickMCP server: {name} v{version}")
     
@@ -455,6 +466,51 @@ class QuickMCPServer:
             "prompts": self.list_prompts(),
         }
     
+    def start_autodiscovery(self, transport: str = "stdio", host: str = "localhost", port: int = 8000) -> None:
+        """
+        Start autodiscovery broadcasting.
+        
+        Args:
+            transport: Transport type
+            host: Host for network transports
+            port: Port for network transports
+        """
+        if not self.enable_autodiscovery:
+            return
+        
+        if self._autodiscovery:
+            self.logger.warning("Autodiscovery already started")
+            return
+        
+        # Create autodiscovery instance
+        self._autodiscovery = AutoDiscovery(
+            server_name=self.name,
+            server_version=self.version,
+            server_description=self.description,
+            transport=transport,
+            host=host,
+            port=port,
+            metadata=self.discovery_metadata
+        )
+        
+        # Update capabilities
+        self._autodiscovery.update_capabilities(
+            tools=self.list_tools(),
+            resources=self.list_resources(),
+            prompts=self.list_prompts()
+        )
+        
+        # Start broadcasting
+        self._autodiscovery.start()
+        self.logger.info("Autodiscovery broadcasting started")
+    
+    def stop_autodiscovery(self) -> None:
+        """Stop autodiscovery broadcasting."""
+        if self._autodiscovery:
+            self._autodiscovery.stop()
+            self._autodiscovery = None
+            self.logger.info("Autodiscovery broadcasting stopped")
+    
     def run(
         self,
         transport: str = "stdio",
@@ -485,14 +541,21 @@ class QuickMCPServer:
                         f"{len(self._resources)} resources, "
                         f"{len(self._prompts)} prompts")
         
-        if transport == "stdio":
-            self.run_stdio()
-        elif transport == "sse":
-            self.run_sse(host=host, port=port, **kwargs)
-        elif transport == "http":
-            self.run_http(host=host, port=port, **kwargs)
-        else:
-            raise ValueError(f"Unknown transport: {transport}")
+        # Start autodiscovery if enabled
+        self.start_autodiscovery(transport=transport, host=host, port=port)
+        
+        try:
+            if transport == "stdio":
+                self.run_stdio()
+            elif transport == "sse":
+                self.run_sse(host=host, port=port, **kwargs)
+            elif transport == "http":
+                self.run_http(host=host, port=port, **kwargs)
+            else:
+                raise ValueError(f"Unknown transport: {transport}")
+        finally:
+            # Stop autodiscovery when server stops
+            self.stop_autodiscovery()
     
     def run_stdio(self) -> None:
         """Run the server with stdio transport."""
