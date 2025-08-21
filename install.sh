@@ -1,5 +1,5 @@
 #!/bin/bash
-# QuickMCP Quick Install Script
+# MakeMCP Quick Install Script
 
 set -e
 
@@ -9,7 +9,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${BLUE}QuickMCP Installer${NC}"
+echo -e "${BLUE}MakeMCP Installer${NC}"
 echo "=================="
 echo ""
 
@@ -25,13 +25,13 @@ if ! command -v uv &> /dev/null; then
     echo ""
 fi
 
-# Install QuickMCP
-echo "📦 Installing QuickMCP..."
-uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
+# Install MakeMCP
+echo "📦 Installing MakeMCP..."
+uv pip install git+https://github.com/leifmarkthaler/makemcp.git
 
 # Create a test file
 cat > hello.py << 'EOF'
-from quickmcp.quick import tool, run
+from makemcp.quick import tool, run
 
 @tool
 def hello(name: str = "World") -> str:
@@ -44,13 +44,13 @@ def add(a: int, b: int) -> int:
     return a + b
 
 if __name__ == "__main__":
-    print("QuickMCP server ready! Run this file to start.")
+    print("MakeMCP server ready! Run this file to start.")
     print("Tools available: hello, add")
     run()
 EOF
 
 echo ""
-echo -e "${GREEN}✅ QuickMCP installed successfully!${NC}"
+echo -e "${GREEN}✅ MakeMCP installed successfully!${NC}"
 echo ""
 echo "Created hello.py - a simple example server"
 echo ""
