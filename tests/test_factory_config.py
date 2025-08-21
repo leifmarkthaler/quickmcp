@@ -3,7 +3,7 @@ Tests for the factory configuration system.
 """
 
 import pytest
-from quickmcp.factory.config import (
+from makemcp.factory.config import (
     FactoryConfig,
     DEFAULT_CONFIG,
     create_safe_config,
@@ -178,7 +178,7 @@ class TestConfigComparison:
         assert DEFAULT_CONFIG.allow_code_execution is True
         
         # Should be the same instance
-        from quickmcp.factory.config import DEFAULT_CONFIG as config2
+        from makemcp.factory.config import DEFAULT_CONFIG as config2
         assert DEFAULT_CONFIG is config2
 
 
@@ -187,7 +187,7 @@ class TestConfigIntegration:
     
     def test_factory_uses_config(self):
         """Test that factory respects configuration."""
-        from quickmcp.factory import MCPFactory
+        from makemcp.factory import MCPFactory
         
         # Create factory with custom config
         config = FactoryConfig(
@@ -203,7 +203,7 @@ class TestConfigIntegration:
     
     def test_factory_with_safe_config(self):
         """Test factory with safe configuration."""
-        from quickmcp.factory import MCPFactory
+        from makemcp.factory import MCPFactory
         
         config = create_safe_config()
         factory = MCPFactory(config=config)
@@ -213,7 +213,7 @@ class TestConfigIntegration:
     
     def test_config_affects_type_converter(self):
         """Test that config affects type conversion."""
-        from quickmcp.factory.type_conversion import TypeConverter
+        from makemcp.factory.type_conversion import TypeConverter
         
         # Strict config
         strict_config = FactoryConfig(strict_type_conversion=True)

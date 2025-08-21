@@ -3,14 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "quickmcp"
+name = "makemcp"
 version = "0.1.0"
-description = "A simplified wrapper for creating MCP (Model Context Protocol) servers in Python"
+description = "A lightweight, easy-to-use wrapper for creating MCP (Model Context Protocol) servers in Python"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "QuickMCP Contributors"},
+    {name = "MakeMCP Contributors"},
 ]
 keywords = ["mcp", "model-context-protocol", "llm", "ai", "server"]
 classifiers = [
@@ -49,21 +49,21 @@ http = [
 ]
 
 all = [
-    "quickmcp[dev,http]",
+    "makemcp[dev,http]",
 ]
 
 [project.urls]
-Homepage = "https://github.com/leifmarkthaler/quickmcp"
-Documentation = "https://github.com/leifmarkthaler/quickmcp#readme"
-Repository = "https://github.com/leifmarkthaler/quickmcp"
-Issues = "https://github.com/leifmarkthaler/quickmcp/issues"
+Homepage = "https://github.com/leifmarkthaler/makemcp"
+Documentation = "https://github.com/leifmarkthaler/makemcp#readme"
+Repository = "https://github.com/leifmarkthaler/makemcp"
+Issues = "https://github.com/leifmarkthaler/makemcp/issues"
 
 [project.scripts]
-quickmcp = "quickmcp.cli:main"
-mcp-factory = "quickmcp.cli_factory:main"
+makemcp = "makemcp.cli:main"
+mcp-factory = "makemcp.cli_factory:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/quickmcp"]
+packages = ["src/makemcp"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

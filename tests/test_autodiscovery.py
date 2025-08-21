@@ -7,7 +7,7 @@ import asyncio
 import time
 import json
 from unittest.mock import Mock, patch, MagicMock
-from quickmcp.autodiscovery import (
+from makemcp.autodiscovery import (
     ServerInfo,
     DiscoveryBroadcaster,
     DiscoveryListener,
@@ -15,7 +15,7 @@ from quickmcp.autodiscovery import (
     discover_servers,
     MCP_DISCOVERY_MAGIC
 )
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 class TestServerInfo:
@@ -307,7 +307,7 @@ class TestAutoDiscovery:
         assert caps["prompt_count"] == 3
         assert caps["tools"] == ["tool1", "tool2"]
     
-    @patch('quickmcp.autodiscovery.DiscoveryBroadcaster')
+    @patch('makemcp.autodiscovery.DiscoveryBroadcaster')
     def test_context_manager(self, mock_broadcaster_class):
         """Test using AutoDiscovery as context manager."""
         mock_broadcaster = Mock()
@@ -321,12 +321,12 @@ class TestAutoDiscovery:
         mock_broadcaster.stop.assert_called_once()
 
 
-class TestQuickMCPServerIntegration:
-    """Test QuickMCPServer autodiscovery integration."""
+class TestMakeMCPServerIntegration:
+    """Test MakeMCPServer autodiscovery integration."""
     
     def test_server_with_autodiscovery_enabled(self):
         """Test server with autodiscovery enabled."""
-        server = QuickMCPServer(
+        server = MakeMCPServer(
             name="test-server",
             version="1.0.0",
             enable_autodiscovery=True,
@@ -339,7 +339,7 @@ class TestQuickMCPServerIntegration:
     
     def test_server_with_autodiscovery_disabled(self):
         """Test server with autodiscovery disabled."""
-        server = QuickMCPServer(
+        server = MakeMCPServer(
             name="test-server",
             version="1.0.0",
             enable_autodiscovery=False
@@ -348,13 +348,13 @@ class TestQuickMCPServerIntegration:
         assert server.enable_autodiscovery is False
         assert server._autodiscovery is None
     
-    @patch('quickmcp.server.AutoDiscovery')
+    @patch('makemcp.server.AutoDiscovery')
     def test_start_autodiscovery(self, mock_autodiscovery_class):
         """Test starting autodiscovery."""
         mock_autodiscovery = Mock()
         mock_autodiscovery_class.return_value = mock_autodiscovery
         
-        server = QuickMCPServer(
+        server = MakeMCPServer(
             name="test-server",
             enable_autodiscovery=True
         )
@@ -386,7 +386,7 @@ class TestQuickMCPServerIntegration:
     
     def test_stop_autodiscovery(self):
         """Test stopping autodiscovery."""
-        server = QuickMCPServer(
+        server = MakeMCPServer(
             name="test-server",
             enable_autodiscovery=True
         )
@@ -407,7 +407,7 @@ class TestQuickMCPServerIntegration:
 class TestDiscoverServers:
     """Test the discover_servers convenience function."""
     
-    @patch('quickmcp.autodiscovery.DiscoveryListener')
+    @patch('makemcp.autodiscovery.DiscoveryListener')
     async def test_discover_servers(self, mock_listener_class):
         """Test discovering servers."""
         mock_listener = Mock()

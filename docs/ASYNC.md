@@ -1,10 +1,10 @@
-# Async Support in QuickMCP
+# Async Support in MakeMCP
 
-QuickMCP provides comprehensive support for asynchronous (async/await) functions, allowing you to build high-performance MCP servers that can handle concurrent operations efficiently.
+MakeMCP provides comprehensive support for asynchronous (async/await) functions, allowing you to build high-performance MCP servers that can handle concurrent operations efficiently.
 
 ## Overview
 
-QuickMCP's async support includes:
+MakeMCP's async support includes:
 
 - **Automatic Detection**: Async functions are automatically detected and properly handled
 - **Preserve Async Nature**: Async functions remain async after wrapping - no conversion to sync
@@ -17,7 +17,7 @@ QuickMCP's async support includes:
 
 ### 1. Automatic Detection and Wrapping
 
-QuickMCP uses `inspect.iscoroutinefunction()` to detect async functions and creates appropriate wrappers:
+MakeMCP uses `inspect.iscoroutinefunction()` to detect async functions and creates appropriate wrappers:
 
 ```python
 # In MCPFactory._register_function_as_tool()
@@ -39,11 +39,11 @@ else:
 
 ### 2. Preserving Async Nature
 
-Unlike many wrapper systems, QuickMCP preserves the async nature of functions:
+Unlike many wrapper systems, MakeMCP preserves the async nature of functions:
 
 ```python
 import asyncio
-from quickmcp.factory import MCPFactory
+from makemcp.factory import MCPFactory
 
 async def my_async_function(x: int) -> int:
     await asyncio.sleep(0.1)
@@ -62,11 +62,11 @@ assert asyncio.iscoroutinefunction(tool)  # True
 ### Basic Async Tools
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 import asyncio
 import aiohttp
 
-server = QuickMCPServer("async-server")
+server = MakeMCPServer("async-server")
 
 @server.tool()
 async def fetch_url(url: str) -> dict:
@@ -97,10 +97,10 @@ server.run()
 ### Mixed Sync and Async Functions
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 import asyncio
 
-server = QuickMCPServer("mixed-server")
+server = MakeMCPServer("mixed-server")
 
 # Async function
 @server.tool()
@@ -122,7 +122,7 @@ server.run()
 ### Async Class Methods
 
 ```python
-from quickmcp.factory import MCPFactory
+from makemcp.factory import MCPFactory
 import asyncio
 import aiohttp
 
@@ -259,7 +259,7 @@ def sync_validator(data: dict) -> bool:
 
 # Generate MCP server from this module
 if __name__ == "__main__":
-    from quickmcp.factory import create_mcp_from_module
+    from makemcp.factory import create_mcp_from_module
     server = create_mcp_from_module(__file__, server_name="async-utilities")
     server.run()
 ```
@@ -271,14 +271,14 @@ Then use the factory:
 mcp-factory async_utilities.py --name async-utils
 
 # Or programmatically
-from quickmcp.factory import create_mcp_from_module
+from makemcp.factory import create_mcp_from_module
 server = create_mcp_from_module("async_utilities.py")
 ```
 
 ### Decorated Async Functions
 
 ```python
-from quickmcp.factory import mcp_tool, create_mcp_from_module
+from makemcp.factory import mcp_tool, create_mcp_from_module
 import asyncio
 
 @mcp_tool
@@ -331,14 +331,14 @@ if __name__ == "__main__":
 
 ### Concurrent Execution
 
-Async functions in QuickMCP can be executed concurrently, providing significant performance benefits:
+Async functions in MakeMCP can be executed concurrently, providing significant performance benefits:
 
 ```python
 import asyncio
 import time
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer("performance-demo")
+server = MakeMCPServer("performance-demo")
 
 @server.tool()
 async def slow_operation(delay: float) -> dict:
@@ -363,7 +363,7 @@ For async functions that use resources (like HTTP sessions), consider proper res
 
 ```python
 import aiohttp
-from quickmcp.factory import MCPFactory
+from makemcp.factory import MCPFactory
 
 class AsyncAPIClient:
     """API client with proper resource management."""
@@ -408,7 +408,7 @@ Testing async MCP tools requires async test functions:
 ```python
 import pytest
 import asyncio
-from quickmcp.factory import MCPFactory
+from makemcp.factory import MCPFactory
 
 # Your async functions
 async def async_add(a: int, b: int) -> int:
@@ -458,10 +458,10 @@ async def test_concurrent_execution():
 Async functions can raise exceptions that need proper handling:
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 import asyncio
 
-server = QuickMCPServer("error-handling")
+server = MakeMCPServer("error-handling")
 
 @server.tool()
 async def risky_operation(fail: bool = False) -> dict:
@@ -533,7 +533,7 @@ async def save_to_database(data: dict) -> bool:
     return True
 
 # Combine both in one server
-from quickmcp.factory import MCPFactory
+from makemcp.factory import MCPFactory
 factory = MCPFactory()
 server = factory.from_functions({
     "fibonacci": calculate_fibonacci,  # Sync
@@ -603,9 +603,9 @@ import asyncio
 asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 logging.basicConfig(level=logging.DEBUG)
 
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer("debug-server", log_level="DEBUG")
+server = MakeMCPServer("debug-server", log_level="DEBUG")
 ```
 
 ### 2. Use Async Context Managers
@@ -667,7 +667,7 @@ async def monitored_operation(name: str, duration: float) -> dict:
 
 ## Summary
 
-QuickMCP's async support provides:
+MakeMCP's async support provides:
 
 - ✅ **Automatic Detection**: Async functions are detected and wrapped properly
 - ✅ **Preserved Behavior**: Async functions remain async, sync functions remain sync
@@ -679,4 +679,4 @@ QuickMCP's async support provides:
 - ✅ **Error Handling**: Proper exception propagation for async functions
 - ✅ **Type Safety**: Type hints are preserved and validated
 
-This comprehensive async support makes QuickMCP ideal for building high-performance MCP servers that can handle I/O-bound operations efficiently while maintaining the simplicity of the decorator-based API.
+This comprehensive async support makes MakeMCP ideal for building high-performance MCP servers that can handle I/O-bound operations efficiently while maintaining the simplicity of the decorator-based API.

@@ -47,7 +47,7 @@ class FactoryConfig:
             raise ValueError(f"Invalid log_level: {self.log_level}")
         
         # Set up logging level for factory components
-        factory_logger = logging.getLogger("quickmcp.factory")
+        factory_logger = logging.getLogger("makemcp.factory")
         factory_logger.setLevel(getattr(logging, self.log_level))
     
     def merge_pip_mappings(self, base_mappings: Dict[str, str]) -> Dict[str, str]:

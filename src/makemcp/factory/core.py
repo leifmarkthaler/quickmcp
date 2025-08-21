@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Callable
 import logging
 
-from ..server import QuickMCPServer
+from ..server import MakeMCPServer
 from .config import FactoryConfig, DEFAULT_CONFIG
 from .import_analyzer import ImportAnalyzer, MissingDependency
 from .wrappers import ToolWrapperFactory, MethodToolWrapper
@@ -179,9 +179,9 @@ class MCPFactory:
         self.function_extractor = FunctionExtractor(self.config)
         self.wrapper_factory = ToolWrapperFactory(self.config)
         
-        self.server: Optional[QuickMCPServer] = None
+        self.server: Optional[MakeMCPServer] = None
     
-    def from_module(self, module_path: str, include_private: bool = False) -> QuickMCPServer:
+    def from_module(self, module_path: str, include_private: bool = False) -> MakeMCPServer:
         """
         Create an MCP server from a Python module.
         
@@ -190,7 +190,7 @@ class MCPFactory:
             include_private: Include private functions (starting with _)
             
         Returns:
-            QuickMCPServer with tools generated from module functions
+            MakeMCPServer with tools generated from module functions
             
         Raises:
             MissingDependencyError: If required dependencies are missing
@@ -232,7 +232,7 @@ class MCPFactory:
         server_name = self.name or f"{module_name}-mcp"
         server_description = module.__doc__ or f"MCP server for {module_name}"
         
-        self.server = QuickMCPServer(
+        self.server = MakeMCPServer(
             name=server_name,
             version=self.version,
             description=server_description.strip()
@@ -252,7 +252,7 @@ class MCPFactory:
         logger.info(f"Created MCP server '{server_name}' with {len(functions)} tools")
         return self.server
     
-    def from_module_object(self, module, include_private: bool = False) -> QuickMCPServer:
+    def from_module_object(self, module, include_private: bool = False) -> MakeMCPServer:
         """
         Create an MCP server from an already-loaded module object.
         
@@ -261,7 +261,7 @@ class MCPFactory:
             include_private: Include private functions
             
         Returns:
-            QuickMCPServer with module functions as tools
+            MakeMCPServer with module functions as tools
         """
         # Extract functions from the module
         functions = self.function_extractor.extract_from_module(module, include_private)
@@ -271,7 +271,7 @@ class MCPFactory:
         server_name = self.name or f"{module_name.replace('.', '-')}-mcp"
         server_description = module.__doc__ or f"MCP server for {module_name}"
         
-        self.server = QuickMCPServer(
+        self.server = MakeMCPServer(
             name=server_name,
             version=self.version,
             description=server_description.strip() if server_description else ""
@@ -284,7 +284,7 @@ class MCPFactory:
         logger.info(f"Created MCP server '{server_name}' with {len(functions)} tools")
         return self.server
     
-    def from_functions(self, functions: Dict[str, Callable], name: Optional[str] = None) -> QuickMCPServer:
+    def from_functions(self, functions: Dict[str, Callable], name: Optional[str] = None) -> MakeMCPServer:
         """
         Create an MCP server from a dictionary of functions.
         
@@ -293,11 +293,11 @@ class MCPFactory:
             name: Server name
             
         Returns:
-            QuickMCPServer with specified functions as tools
+            MakeMCPServer with specified functions as tools
         """
         server_name = name or self.name or "custom-mcp"
         
-        self.server = QuickMCPServer(
+        self.server = MakeMCPServer(
             name=server_name,
             version=self.version,
             description=f"MCP server with {len(functions)} custom tools"
@@ -309,7 +309,7 @@ class MCPFactory:
         logger.info(f"Created MCP server '{server_name}' with {len(functions)} tools")
         return self.server
     
-    def from_class(self, cls: type, include_private: bool = False) -> QuickMCPServer:
+    def from_class(self, cls: type, include_private: bool = False) -> MakeMCPServer:
         """
         Create an MCP server from a class.
         
@@ -318,12 +318,12 @@ class MCPFactory:
             include_private: Include private methods
             
         Returns:
-            QuickMCPServer with class methods as tools
+            MakeMCPServer with class methods as tools
         """
         class_name = cls.__name__
         server_name = self.name or f"{class_name.lower()}-mcp"
         
-        self.server = QuickMCPServer(
+        self.server = MakeMCPServer(
             name=server_name,
             version=self.version,
             description=cls.__doc__ or f"MCP server for {class_name}"
@@ -350,7 +350,7 @@ class MCPFactory:
         logger.info(f"Created MCP server '{server_name}' with {len(methods)} method tools")
         return self.server
     
-    def from_file_with_decorators(self, file_path: str, decorator_name: str = "mcp_tool") -> QuickMCPServer:
+    def from_file_with_decorators(self, file_path: str, decorator_name: str = "mcp_tool") -> MakeMCPServer:
         """
         Create an MCP server from functions decorated with a specific decorator.
         
@@ -359,7 +359,7 @@ class MCPFactory:
             decorator_name: Name of decorator to look for
             
         Returns:
-            QuickMCPServer with decorated functions as tools
+            MakeMCPServer with decorated functions as tools
         """
         # Extract decorated functions
         functions = self.function_extractor.extract_decorated_functions(file_path, decorator_name)
@@ -368,7 +368,7 @@ class MCPFactory:
         module_name = Path(file_path).stem
         server_name = self.name or f"{module_name}-mcp"
         
-        self.server = QuickMCPServer(
+        self.server = MakeMCPServer(
             name=server_name,
             version=self.version,
             description=f"MCP server for {module_name}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """The absolute simplest QuickMCP example - just 5 lines!"""
 
-from quickmcp.quick import tool, run
+from mcplite.quick import tool, run
 
 @tool
 def hello(name: str) -> str:

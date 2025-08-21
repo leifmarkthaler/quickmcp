@@ -1,10 +1,10 @@
-# QuickMCP Discovery Guide
+# MakeMCP Discovery Guide
 
-This guide explains how QuickMCP's discovery system works and how to use it effectively with Gleitzeit and other MCP clients.
+This guide explains how MakeMCP's discovery system works and how to use it effectively with Gleitzeit and other MCP clients.
 
 ## Overview
 
-QuickMCP provides two complementary discovery mechanisms:
+MakeMCP provides two complementary discovery mechanisms:
 
 1. **Registry-based discovery** for stdio servers (launched as child processes)
 2. **Network autodiscovery** for SSE/HTTP servers (network services)
@@ -27,7 +27,7 @@ QuickMCP provides two complementary discovery mechanisms:
 
 ### The Server Registry
 
-The server registry is a local database of QuickMCP servers that can be launched via stdio. It's stored in `~/.quickmcp/registry.json`.
+The server registry is a local database of MakeMCP servers that can be launched via stdio. It's stored in `~/.makemcp/registry.json`.
 
 ### Registering Servers
 
@@ -35,10 +35,10 @@ The server registry is a local database of QuickMCP servers that can be launched
 
 ```bash
 # Basic registration
-quickmcp register my-server "python my_server.py"
+makemcp register my-server "python my_server.py"
 
 # With additional options
-quickmcp register my-server "python my_server.py" \
+makemcp register my-server "python my_server.py" \
     --description "My custom MCP server" \
     --working-dir "/path/to/server" \
     --tool-prefix "my."
@@ -47,7 +47,7 @@ quickmcp register my-server "python my_server.py" \
 #### Programmatically
 
 ```python
-from quickmcp import register_server
+from makemcp import register_server
 
 register_server(
     name="my-server",
@@ -60,21 +60,21 @@ register_server(
 
 ### Auto-Discovery in Filesystem
 
-QuickMCP can automatically find servers in your filesystem:
+MakeMCP can automatically find servers in your filesystem:
 
 ```bash
 # Scan default locations
-quickmcp discover --scan-filesystem
+makemcp discover --scan-filesystem
 
 # Scan specific directories
-quickmcp discover --scan-filesystem --paths ./servers ~/mcp-servers
+makemcp discover --scan-filesystem --paths ./servers ~/mcp-servers
 
 # Auto-register found servers
-quickmcp discover --scan-filesystem --auto-register
+makemcp discover --scan-filesystem --auto-register
 ```
 
 The discovery process:
-1. Scans for Python files containing `QuickMCPServer` or `from quickmcp import`
+1. Scans for Python files containing `MakeMCPServer` or `from makemcp import`
 2. Attempts to run each file with `--info` flag
 3. Parses the returned JSON metadata
 4. Creates registry entries for valid servers
@@ -83,23 +83,23 @@ The discovery process:
 
 ```bash
 # List all registered servers
-quickmcp list
+makemcp list
 
 # Show detailed information
-quickmcp info my-server
+makemcp info my-server
 
 # Remove a server
-quickmcp unregister my-server
+makemcp unregister my-server
 ```
 
 ### Exporting for Gleitzeit
 
 ```bash
 # Export as YAML (recommended for Gleitzeit)
-quickmcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
+makemcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
 
 # Export as JSON
-quickmcp export --format json > servers.json
+makemcp export --format json > servers.json
 ```
 
 The exported configuration is ready to use with Gleitzeit:
@@ -128,10 +128,10 @@ mcp:
 ### Server-Side Setup
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 # Create server with discovery metadata
-server = QuickMCPServer(
+server = MakeMCPServer(
     "my-server",
     version="1.0.0",
     description="My network server",
@@ -152,17 +152,17 @@ server.run(transport="sse", port=8080)
 
 ```bash
 # Discover network servers
-quickmcp discover --scan-network
+makemcp discover --scan-network
 
 # With custom timeout
-quickmcp discover --scan-network --timeout 10
+makemcp discover --scan-network --timeout 10
 ```
 
 #### Programmatically
 
 ```python
 import asyncio
-from quickmcp import discover_servers
+from makemcp import discover_servers
 
 async def find_servers():
     # Discover servers (5 second timeout)
@@ -187,7 +187,7 @@ asyncio.run(find_servers())
 
 ```python
 # Disable for a specific server
-server = QuickMCPServer("my-server", enable_autodiscovery=False)
+server = MakeMCPServer("my-server", enable_autodiscovery=False)
 
 # Or disable at runtime
 server.enable_autodiscovery = False
@@ -195,14 +195,14 @@ server.enable_autodiscovery = False
 
 ## Server Metadata Protocol
 
-QuickMCP servers support a metadata protocol for discovery:
+MakeMCP servers support a metadata protocol for discovery:
 
 ### Implementing the Protocol
 
-When a QuickMCP server receives the `--info` flag, it outputs JSON metadata and exits:
+When a MakeMCP server receives the `--info` flag, it outputs JSON metadata and exits:
 
 ```python
-# This is handled automatically by QuickMCPServer
+# This is handled automatically by MakeMCPServer
 # But here's what happens internally:
 
 if "--info" in sys.argv:
@@ -251,9 +251,9 @@ Here's a complete workflow for setting up discovery:
 
 ```python
 # my_server.py
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer(
+server = MakeMCPServer(
     "data-processor",
     version="1.0.0",
     description="Process and analyze data",
@@ -280,7 +280,7 @@ if __name__ == "__main__":
 
 ```bash
 # Register for stdio usage
-quickmcp register data-processor "python my_server.py" \
+makemcp register data-processor "python my_server.py" \
     --description "Process and analyze data" \
     --tool-prefix "data."
 ```
@@ -289,7 +289,7 @@ quickmcp register data-processor "python my_server.py" \
 
 ```bash
 # Export configuration
-quickmcp export > ~/.gleitzeit/mcp_servers.yaml
+makemcp export > ~/.gleitzeit/mcp_servers.yaml
 ```
 
 ### 4. Use in Gleitzeit Workflow
@@ -313,7 +313,7 @@ tasks:
 python my_server.py --transport sse --port 8080
 
 # Discover from another machine
-quickmcp discover --scan-network
+makemcp discover --scan-network
 ```
 
 ## Troubleshooting
@@ -322,14 +322,14 @@ quickmcp discover --scan-network
 
 ```bash
 # Check registry location
-ls ~/.quickmcp/registry.json
+ls ~/.makemcp/registry.json
 
 # Reset registry
-rm ~/.quickmcp/registry.json
-quickmcp list  # Creates new empty registry
+rm ~/.makemcp/registry.json
+makemcp list  # Creates new empty registry
 
 # Manually edit registry
-vi ~/.quickmcp/registry.json
+vi ~/.makemcp/registry.json
 ```
 
 ### Network Discovery Issues
@@ -343,7 +343,7 @@ vi ~/.quickmcp/registry.json
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-from quickmcp import discover_servers
+from makemcp import discover_servers
 import asyncio
 
 async def debug_discovery():
@@ -360,11 +360,11 @@ asyncio.run(debug_discovery())
 python my_server.py --info
 
 # Check if server is registered
-quickmcp list | grep my-server
+makemcp list | grep my-server
 
 # Re-register if needed
-quickmcp unregister my-server
-quickmcp register my-server "python my_server.py"
+makemcp unregister my-server
+makemcp register my-server "python my_server.py"
 ```
 
 ## Best Practices
@@ -391,13 +391,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Install QuickMCP
-        run: pip install quickmcp
+      - name: Install MakeMCP
+        run: pip install makemcp
       
       - name: Discover and register servers
         run: |
-          quickmcp discover --scan-filesystem --paths ./servers --auto-register
-          quickmcp export --format yaml > mcp_servers.yaml
+          makemcp discover --scan-filesystem --paths ./servers --auto-register
+          makemcp export --format yaml > mcp_servers.yaml
       
       - name: Upload configuration
         uses: actions/upload-artifact@v2
@@ -425,6 +425,6 @@ jobs:
 
 ## Further Reading
 
-- [QuickMCP README](../README.md)
+- [MakeMCP README](../README.md)
 - [MCP Protocol Specification](https://modelcontextprotocol.io)
 - [Gleitzeit Documentation](https://github.com/leifmarkthaler/gleitzeit)

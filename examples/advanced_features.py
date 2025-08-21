@@ -13,8 +13,8 @@ import json
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from quickmcp import QuickMCPServer
-from quickmcp.factory import (
+from mcplite import QuickMCPServer
+from mcplite.factory import (
     MCPFactory,
     FactoryConfig,
     create_safe_config,
@@ -229,7 +229,7 @@ def demo_error_handling():
     # Pattern 1: Handle missing dependencies
     print("\n1. Missing Dependencies:")
     try:
-        from quickmcp.factory import MCPFactory
+        from mcplite.factory import MCPFactory
         factory = MCPFactory()
         
         # This would fail if numpy is missing
@@ -246,7 +246,7 @@ def demo_error_handling():
     # Pattern 2: Type conversion errors
     print("\n2. Type Conversion:")
     try:
-        from quickmcp.factory import TypeConverter
+        from mcplite.factory import TypeConverter
         converter = TypeConverter()
         
         # Valid conversion

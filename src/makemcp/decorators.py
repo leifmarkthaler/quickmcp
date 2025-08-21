@@ -1,5 +1,5 @@
 """
-QuickMCP Decorators - Standalone decorators for MCP components
+MakeMCP Decorators - Standalone decorators for MCP components
 """
 
 from typing import Callable, Optional, Dict, Any, List
@@ -31,7 +31,7 @@ def tool(
         return a + b
     
     # Later...
-    server = QuickMCPServer("my-server")
+    server = MakeMCPServer("my-server")
     server.register_decorated()  # Registers all decorated functions
     ```
     """

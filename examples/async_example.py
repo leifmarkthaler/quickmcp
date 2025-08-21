@@ -14,7 +14,7 @@ import time
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from quickmcp.factory import MCPFactory, mcp_tool
+from mcplite.factory import MCPFactory, mcp_tool
 
 
 # Async utility functions

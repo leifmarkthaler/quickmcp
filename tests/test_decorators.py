@@ -3,7 +3,7 @@ Tests for QuickMCP standalone decorators
 """
 
 import pytest
-from quickmcp.decorators import (
+from makemcp.decorators import (
     tool,
     resource,
     prompt,

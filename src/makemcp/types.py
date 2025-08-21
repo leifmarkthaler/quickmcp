@@ -1,5 +1,5 @@
 """
-QuickMCP Types - Type definitions for QuickMCP
+MakeMCP Types - Type definitions for MakeMCP
 """
 
 from typing import Any, Dict, List, Optional, Union
@@ -57,7 +57,7 @@ class TransportType(str, Enum):
 
 class ServerConfig(BaseModel):
     """
-    Configuration for a QuickMCP server.
+    Configuration for a MakeMCP server.
     """
     name: str = Field(..., description="Server name")
     version: str = Field(default="1.0.0", description="Server version")

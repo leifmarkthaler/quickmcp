@@ -1,5 +1,5 @@
 """
-QuickMCP Server - Simplified MCP server creation
+MakeMCP Server - Simplified MCP server creation
 """
 
 import asyncio
@@ -20,14 +20,14 @@ from .autodiscovery import AutoDiscovery
 logger = logging.getLogger(__name__)
 
 
-class QuickMCPServer:
+class MakeMCPServer:
     """
     A simplified wrapper around the MCP Server class that makes it easy
     to create and run MCP servers with minimal boilerplate.
     
     Example:
         ```python
-        server = QuickMCPServer("my-server")
+        server = MakeMCPServer("my-server")
         
         @server.tool()
         def add(a: int, b: int) -> int:
@@ -51,7 +51,7 @@ class QuickMCPServer:
         discovery_metadata: Optional[Dict[str, Any]] = None,
     ):
         """
-        Initialize a QuickMCP server.
+        Initialize a MakeMCP server.
         
         Args:
             name: The name of the server
@@ -94,7 +94,7 @@ class QuickMCPServer:
         self.discovery_metadata = discovery_metadata or {}
         self._autodiscovery: Optional[AutoDiscovery] = None
         
-        self.logger.info(f"Initialized QuickMCP server: {name} v{version}")
+        self.logger.info(f"Initialized MakeMCP server: {name} v{version}")
     
     def _register_handlers(self):
         """Register the request handlers with the MCP server."""
@@ -616,7 +616,7 @@ class QuickMCPServer:
             from starlette.routing import Route
             import uvicorn
         except ImportError:
-            self.logger.error("SSE transport requires 'http' extras: pip install quickmcp[http]")
+            self.logger.error("SSE transport requires 'http' extras: pip install makemcp[http]")
             raise
         
         self.logger.info(f"Running SSE server on http://{host}:{port}/sse")
@@ -696,6 +696,6 @@ class QuickMCPServer:
         }
     
     def __repr__(self) -> str:
-        return (f"QuickMCPServer(name='{self.name}', version='{self.version}', "
+        return (f"MakeMCPServer(name='{self.name}', version='{self.version}', "
                 f"tools={len(self._tools)}, resources={len(self._resources)}, "
                 f"prompts={len(self._prompts)})")

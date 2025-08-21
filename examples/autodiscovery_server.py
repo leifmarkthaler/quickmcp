@@ -6,7 +6,7 @@ This server will broadcast its presence on the local network,
 allowing Gleitzeit and other MCP clients to discover it automatically.
 """
 
-from quickmcp import QuickMCPServer
+from mcplite import QuickMCPServer
 import asyncio
 import time
 

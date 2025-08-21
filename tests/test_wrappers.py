@@ -8,13 +8,13 @@ import inspect
 from typing import List, Dict, Optional, Any
 from unittest.mock import Mock, MagicMock, patch
 
-from quickmcp.factory.wrappers import (
+from makemcp.factory.wrappers import (
     SyncToolWrapper,
     AsyncToolWrapper,
     MethodToolWrapper,
     ToolWrapperFactory
 )
-from quickmcp.factory.config import FactoryConfig
+from makemcp.factory.config import FactoryConfig
 
 
 class TestSyncToolWrapper:
@@ -274,7 +274,7 @@ class TestToolWrapperFactory:
     
     def test_factory_with_config(self):
         """Test factory with custom configuration."""
-        from quickmcp.factory.config import create_safe_config
+        from makemcp.factory.config import create_safe_config
         
         def func(x: int) -> int:
             return x * 2
@@ -350,7 +350,7 @@ class TestWrapperTypeConversion:
     
     def test_strict_type_conversion(self):
         """Test strict type conversion mode."""
-        from quickmcp.factory.config import create_safe_config
+        from makemcp.factory.config import create_safe_config
         
         def func(x: int) -> int:
             return x * 2

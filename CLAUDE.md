@@ -1,12 +1,12 @@
-# Claude Integration Guide for QuickMCP
+# Claude Integration Guide for MakeMCP
 
 ## Overview
 
-QuickMCP is a wrapper library that simplifies creating MCP (Model Context Protocol) servers using the **official MCP Python SDK** (`mcp` package). This guide helps Claude and other AI assistants understand how to properly work with this codebase.
+MakeMCP is a wrapper library that simplifies creating MCP (Model Context Protocol) servers using the **official MCP Python SDK** (`mcp` package). This guide helps Claude and other AI assistants understand how to properly work with this codebase.
 
 ## Important: Use the Official MCP Python SDK
 
-QuickMCP is built on top of the official MCP Python SDK from Anthropic. It is **NOT** compatible with FastMCP or other third-party MCP implementations.
+MakeMCP is built on top of the official MCP Python SDK from Anthropic. It is **NOT** compatible with FastMCP or other third-party MCP implementations.
 
 ### Required Dependencies
 
@@ -20,7 +20,7 @@ pip install mcp
 
 ### UV Integration
 
-QuickMCP is fully integrated with `uv` for blazing-fast package management:
+MakeMCP is fully integrated with `uv` for blazing-fast package management:
 
 1. **Automatic Detection**: All install commands auto-detect if `uv` is available
 2. **Fallback Support**: Gracefully falls back to `pip` if `uv` is not installed
@@ -32,10 +32,10 @@ The official MCP SDK package is `mcp` (not `mcp-python`, `fastmcp`, or any other
 
 ## Architecture Overview
 
-QuickMCP provides a decorator-based API that internally uses the official SDK's handler-based approach:
+MakeMCP provides a decorator-based API that internally uses the official SDK's handler-based approach:
 
 1. **Decorators** (`@server.tool()`, `@server.resource()`, `@server.prompt()`) - Simple API for users
-2. **Handler Registration** - QuickMCP registers handlers with the MCP Server internally
+2. **Handler Registration** - MakeMCP registers handlers with the MCP Server internally
 3. **Official SDK Server** - The underlying `mcp.server.Server` handles the protocol
 4. **Discovery System** - Two-tier discovery for stdio and network servers
 5. **Registry** - Local registry for stdio server management
@@ -50,7 +50,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, Resource, Prompt, TextContent
 
-class QuickMCPServer:
+class MakeMCPServer:
     def __init__(self, name: str, version: str = "1.0.0"):
         # Create the official SDK server
         self._server = Server(name, version=version)
@@ -61,7 +61,7 @@ class QuickMCPServer:
 
 ### Async Function Support
 
-QuickMCP provides **full support for async functions**. The factory system automatically detects and properly wraps async functions while preserving their async nature.
+MakeMCP provides **full support for async functions**. The factory system automatically detects and properly wraps async functions while preserving their async nature.
 
 #### Key Async Features:
 
@@ -94,7 +94,7 @@ else:
 #### Usage Examples:
 
 ```python
-from quickmcp.factory import create_mcp_from_module, mcp_tool
+from makemcp.factory import create_mcp_from_module, mcp_tool
 import asyncio
 
 # Async functions are automatically detected
@@ -206,7 +206,7 @@ Requires additional dependencies: `pip install starlette uvicorn`
 
 ## Development Workflow
 
-When making changes to QuickMCP:
+When making changes to MakeMCP:
 
 1. **Ensure official SDK is installed**: `uv pip install mcp`
 2. **Run tests after changes**: `./run_tests.sh`
@@ -225,7 +225,7 @@ When making changes to QuickMCP:
 When adding new functionality, follow this pattern:
 
 ```python
-# In QuickMCPServer class
+# In MakeMCPServer class
 
 def new_feature(self, **kwargs):
     """User-facing decorator."""
@@ -261,13 +261,13 @@ When adding features:
 
 ## Discovery System
 
-QuickMCP uses a two-tier discovery system:
+MakeMCP uses a two-tier discovery system:
 
 ### 1. Registry-based Discovery (stdio servers)
-- Servers are registered in `~/.quickmcp/registry.json`
+- Servers are registered in `~/.makemcp/registry.json`
 - Can be discovered via filesystem scanning
 - Exported to Gleitzeit-compatible configuration
-- Managed via CLI: `quickmcp register/list/discover`
+- Managed via CLI: `makemcp register/list/discover`
 
 ### 2. Network Discovery (SSE/HTTP servers)
 - Servers broadcast via UDP multicast (239.255.41.42:42424)
@@ -276,21 +276,21 @@ QuickMCP uses a two-tier discovery system:
 
 ## CLI Commands
 
-QuickMCP provides a CLI for server management:
+MakeMCP provides a CLI for server management:
 
 ```bash
 # Server management
-quickmcp register <name> <command>  # Register a server
-quickmcp unregister <name>          # Remove a server
-quickmcp list                       # List registered servers
-quickmcp info <name>                # Show server details
+makemcp register <name> <command>  # Register a server
+makemcp unregister <name>          # Remove a server
+makemcp list                       # List registered servers
+makemcp info <name>                # Show server details
 
 # Discovery
-quickmcp discover --scan-filesystem  # Find servers in filesystem
-quickmcp discover --scan-network    # Find network servers
+makemcp discover --scan-filesystem  # Find servers in filesystem
+makemcp discover --scan-network    # Find network servers
 
 # Export
-quickmcp export --format yaml       # Export for Gleitzeit
+makemcp export --format yaml       # Export for Gleitzeit
 ```
 
 ## Server Metadata Protocol
@@ -315,7 +315,7 @@ if "--info" in sys.argv:
 
 ## MCP Factory System
 
-QuickMCP includes a powerful factory system for automatically generating MCP servers from existing Python code.
+MakeMCP includes a powerful factory system for automatically generating MCP servers from existing Python code.
 
 ### Core Factory Features
 
@@ -327,7 +327,7 @@ QuickMCP includes a powerful factory system for automatically generating MCP ser
 ### Factory Usage Examples
 
 ```python
-from quickmcp.factory import MCPFactory, create_mcp_from_module
+from makemcp.factory import MCPFactory, create_mcp_from_module
 
 # Create server from a Python module
 server = create_mcp_from_module("my_utils.py")
@@ -381,5 +381,5 @@ class MixedProcessor:
 
 - [Official MCP Documentation](https://modelcontextprotocol.io)
 - [MCP Python SDK Repository](https://github.com/modelcontextprotocol/python-sdk)
-- [QuickMCP Repository](https://github.com/leifmarkthaler/quickmcp)
+- [MakeMCP Repository](https://github.com/leifmarkthaler/makemcp)
 - [Gleitzeit Integration](https://github.com/leifmarkthaler/gleitzeit)

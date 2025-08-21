@@ -23,7 +23,7 @@ from typing import Optional, List, Dict, Any
 import fnmatch
 import hashlib
 
-from quickmcp import QuickMCPServer
+from mcplite import QuickMCPServer
 
 # Configuration
 DEFAULT_BASE_DIR = os.getcwd()  # Default to current directory

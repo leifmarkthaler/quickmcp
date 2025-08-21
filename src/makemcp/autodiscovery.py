@@ -1,5 +1,5 @@
 """
-QuickMCP Autodiscovery - Allow MCP servers to be discovered on the network
+MakeMCP Autodiscovery - Allow MCP servers to be discovered on the network
 """
 
 import asyncio
@@ -354,7 +354,7 @@ class DiscoveryListener:
 
 
 class AutoDiscovery:
-    """High-level autodiscovery interface for QuickMCP servers."""
+    """High-level autodiscovery interface for MakeMCP servers."""
     
     def __init__(
         self,

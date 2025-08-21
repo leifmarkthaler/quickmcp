@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 import sys
 
-from quickmcp.factory import (
+from makemcp.factory import (
     MCPFactory, ImportAnalyzer, MissingDependency, MissingDependencyError,
     analyze_dependencies, check_dependencies, get_install_command
 )
@@ -184,7 +184,7 @@ def my_function():
     return "hello"
 ''')
         
-        from quickmcp.factory import FactoryConfig
+        from makemcp.factory import FactoryConfig
         config = FactoryConfig(check_dependencies=True)
         factory = MCPFactory(config=config)
         
@@ -211,7 +211,7 @@ def my_function():
     return "without module"
 ''')
         
-        from quickmcp.factory import FactoryConfig
+        from makemcp.factory import FactoryConfig
         config = FactoryConfig(check_dependencies=True)
         factory = MCPFactory(config=config)
         server = factory.from_module(str(test_file))
@@ -232,12 +232,12 @@ def my_function():
     return "hello"
 ''')
         
-        from quickmcp.factory import FactoryConfig
+        from makemcp.factory import FactoryConfig
         config = FactoryConfig(check_dependencies=False)
         factory = MCPFactory(config=config)
         
         # Should not raise MissingDependencyError, but will raise ModuleLoadError due to missing import
-        from quickmcp.factory.errors import ModuleLoadError
+        from makemcp.factory.errors import ModuleLoadError
         with pytest.raises(ModuleLoadError):
             factory.from_module(str(test_file))
     
@@ -401,7 +401,7 @@ def my_function():
     return "basic version"
 ''')
         
-        from quickmcp.factory import FactoryConfig
+        from makemcp.factory import FactoryConfig
         config = FactoryConfig(check_dependencies=True)
         factory = MCPFactory(config=config)
         

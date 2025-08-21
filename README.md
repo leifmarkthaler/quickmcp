@@ -1,9 +1,9 @@
-# QuickMCP
+# MakeMCP
 
 The fastest way to create MCP (Model Context Protocol) servers in Python. Zero boilerplate, maximum functionality.
 
 ```python
-from quickmcp.quick import tool, run
+from makemcp.quick import tool, run
 
 @tool
 def hello(name: str) -> str:
@@ -12,11 +12,11 @@ def hello(name: str) -> str:
 run()  # Your MCP server is running!
 ```
 
-QuickMCP is built on the **official MCP Python SDK** but removes all the complexity. Create powerful MCP servers with just decorators.
+MakeMCP is built on the **official MCP Python SDK** but removes all the complexity. Create powerful MCP servers with just decorators.
 
 **[Quickstart](QUICKSTART.md)** • **[Getting Started](GETTING_STARTED.md)** • **[Examples](examples/)** • **[Documentation](#documentation)**
 
-## Why QuickMCP?
+## Why MakeMCP?
 
 - **Zero Boilerplate**: Just decorators. No classes, no handlers, no setup.
 - **Use Your Existing Code**: Any Python file becomes an MCP server instantly
@@ -31,8 +31,8 @@ QuickMCP is built on the **official MCP Python SDK** but removes all the complex
 # Install uv if you don't have it (optional but recommended for 10-100x faster installs)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install QuickMCP
-uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
+# Install MakeMCP
+uv pip install git+https://github.com/leifmarkthaler/makemcp.git
 ```
 
 That's it! You're ready to create MCP servers.
@@ -42,19 +42,19 @@ That's it! You're ready to create MCP servers.
 
 ### Using pip (slower but works everywhere)
 ```bash
-pip install git+https://github.com/leifmarkthaler/quickmcp.git
+pip install git+https://github.com/leifmarkthaler/makemcp.git
 ```
 
 ### For development
 ```bash
-git clone https://github.com/leifmarkthaler/quickmcp.git
-cd quickmcp
+git clone https://github.com/leifmarkthaler/makemcp.git
+cd makemcp
 uv pip install -e ".[dev]"
 ```
 
 ### For SSE/HTTP transport
 ```bash
-uv pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.git"
+uv pip install "makemcp[http] @ git+https://github.com/leifmarkthaler/makemcp.git"
 ```
 </details>
 
@@ -63,7 +63,7 @@ uv pip install "quickmcp[http] @ git+https://github.com/leifmarkthaler/quickmcp.
 ### The Simplest Example (3 lines)
 
 ```python
-from quickmcp.quick import tool, run
+from makemcp.quick import tool, run
 
 @tool
 def hello(name: str) -> str:
@@ -75,7 +75,7 @@ run()
 ### Use Your Existing Code (1 line)
 
 ```python
-from quickmcp.quick import from_file
+from makemcp.quick import from_file
 
 # Any Python file becomes an MCP server
 from_file("my_utils.py").run()
@@ -84,10 +84,10 @@ from_file("my_utils.py").run()
 ### Traditional Approach (More Control)
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 # Create a server
-server = QuickMCPServer("my-server")
+server = MakeMCPServer("my-server")
 
 # Add tools with decorators
 @server.tool()
@@ -122,9 +122,9 @@ if __name__ == "__main__":
 ### Basic Server with Tools
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer("calculator")
+server = MakeMCPServer("calculator")
 
 @server.tool()
 def calculate(operation: str, x: float, y: float) -> float:
@@ -146,14 +146,14 @@ server.run()
 
 ### Async Operations
 
-QuickMCP has **full support for async functions**. Async functions are automatically detected and properly wrapped while preserving their async nature.
+MakeMCP has **full support for async functions**. Async functions are automatically detected and properly wrapped while preserving their async nature.
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 import asyncio
 import aiohttp
 
-server = QuickMCPServer("async-example")
+server = MakeMCPServer("async-example")
 
 @server.tool()
 async def fetch_url(url: str) -> dict:
@@ -189,10 +189,10 @@ server.run()
 ### Resources and Prompts
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 import json
 
-server = QuickMCPServer("knowledge-base")
+server = MakeMCPServer("knowledge-base")
 
 # In-memory knowledge base
 knowledge = {}
@@ -226,9 +226,9 @@ server.run()
 ### SSE Transport for Network Access
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer("network-server")
+server = MakeMCPServer("network-server")
 
 @server.tool()
 def echo(message: str) -> str:
@@ -251,7 +251,7 @@ The MCP Factory automatically creates MCP servers from existing Python code with
 ### Quick Examples
 
 ```python
-from quickmcp.factory import create_mcp_from_module
+from makemcp.factory import create_mcp_from_module
 
 # Create server from any Python file
 server = create_mcp_from_module("my_utils.py")
@@ -302,7 +302,7 @@ def sync_helper(text: str) -> str:
 
 # Generate server automatically
 if __name__ == "__main__":
-    from quickmcp.factory import create_mcp_from_module
+    from makemcp.factory import create_mcp_from_module
     server = create_mcp_from_module(__file__)
     server.run()
 ```
@@ -310,7 +310,7 @@ if __name__ == "__main__":
 ### Generate from Classes with Async Methods
 
 ```python
-from quickmcp.factory import MCPFactory
+from makemcp.factory import MCPFactory
 
 class AsyncDataProcessor:
     """Data processor with async methods."""
@@ -344,7 +344,7 @@ server.run()
 ### Use Decorators for Selective Exposure
 
 ```python
-from quickmcp.factory import mcp_tool, create_mcp_from_module
+from makemcp.factory import mcp_tool, create_mcp_from_module
 
 @mcp_tool
 async def exposed_async_function(data: str) -> str:
@@ -393,9 +393,9 @@ def calculate_many(operation: str, values: list[float]) -> float:
 ### Server Configuration
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer(
+server = MakeMCPServer(
     name="my-server",
     version="2.0.0",
     description="My advanced MCP server",
@@ -408,7 +408,7 @@ server = QuickMCPServer(
 You can also use decorators before creating the server:
 
 ```python
-from quickmcp import tool, resource, prompt, QuickMCPServer
+from makemcp import tool, resource, prompt, MakeMCPServer
 
 @tool()
 def my_tool(arg: str) -> str:
@@ -419,7 +419,7 @@ def my_resource(id: str) -> str:
     return f"Data for {id}"
 
 # Later, create server and register
-server = QuickMCPServer("my-server")
+server = MakeMCPServer("my-server")
 server.register_module(__main__)  # Coming soon
 server.run()
 ```
@@ -446,28 +446,28 @@ mcp-inspector stdio -- python your_server.py
 
 ## Discovery and Registration
 
-QuickMCP provides comprehensive discovery mechanisms for both local and network-based MCP servers, making it easy to integrate with Gleitzeit and other MCP clients.
+MakeMCP provides comprehensive discovery mechanisms for both local and network-based MCP servers, making it easy to integrate with Gleitzeit and other MCP clients.
 
 ### Overview
 
-QuickMCP supports two discovery approaches:
+MakeMCP supports two discovery approaches:
 - **Registry-based discovery** for stdio servers (launched as child processes)
 - **Network autodiscovery** for SSE/HTTP servers (running as network services)
 
 ### Server Registry (for stdio servers)
 
-The server registry allows you to register QuickMCP servers that can be launched via stdio transport.
+The server registry allows you to register MakeMCP servers that can be launched via stdio transport.
 
 #### Registering Servers
 
 ```bash
 # Register a server with the CLI
-quickmcp register my-server "python my_server.py" \
+makemcp register my-server "python my_server.py" \
     --description "My custom MCP server" \
     --tool-prefix "my."
 
 # Or register programmatically
-from quickmcp import register_server
+from makemcp import register_server
 
 register_server(
     name="my-server",
@@ -481,10 +481,10 @@ register_server(
 
 ```bash
 # List all registered servers
-quickmcp list
+makemcp list
 
 # Or programmatically
-from quickmcp import list_servers
+from makemcp import list_servers
 
 for server in list_servers():
     print(f"{server.name}: {server.description}")
@@ -492,17 +492,17 @@ for server in list_servers():
 
 #### Auto-Discovery in Filesystem
 
-QuickMCP can automatically discover servers in your filesystem:
+MakeMCP can automatically discover servers in your filesystem:
 
 ```bash
 # Discover servers in current directory and common locations
-quickmcp discover --scan-filesystem
+makemcp discover --scan-filesystem
 
 # Discover and auto-register found servers
-quickmcp discover --scan-filesystem --auto-register
+makemcp discover --scan-filesystem --auto-register
 
 # Specify custom search paths
-quickmcp discover --scan-filesystem --paths ./my-servers ~/mcp-servers
+makemcp discover --scan-filesystem --paths ./my-servers ~/mcp-servers
 ```
 
 ### Network Autodiscovery (for SSE/HTTP servers)
@@ -512,13 +512,13 @@ Network servers automatically broadcast their presence via UDP multicast when ru
 #### Server-Side (Automatic)
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 # Network servers automatically broadcast when running
-server = QuickMCPServer("my-server")
+server = MakeMCPServer("my-server")
 
 # Add discovery metadata
-server = QuickMCPServer(
+server = MakeMCPServer(
     "my-server",
     discovery_metadata={
         "author": "Your Name",
@@ -535,17 +535,17 @@ server.run(transport="sse", port=8080)
 
 ```bash
 # Discover network servers
-quickmcp discover --scan-network
+makemcp discover --scan-network
 
 # Discover with custom timeout
-quickmcp discover --scan-network --timeout 10
+makemcp discover --scan-network --timeout 10
 ```
 
 Or programmatically:
 
 ```python
 import asyncio
-from quickmcp import discover_servers
+from makemcp import discover_servers
 
 async def find_network_servers():
     servers = await discover_servers(timeout=5.0)
@@ -555,33 +555,33 @@ async def find_network_servers():
 asyncio.run(find_network_servers())
 ```
 
-### QuickMCP CLI
+### MakeMCP CLI
 
-The QuickMCP CLI provides comprehensive server management:
+The MakeMCP CLI provides comprehensive server management:
 
 ```bash
 # Register a server
-quickmcp register <name> <command> [options]
+makemcp register <name> <command> [options]
 
 # Unregister a server
-quickmcp unregister <name>
+makemcp unregister <name>
 
 # List registered servers
-quickmcp list
+makemcp list
 
 # Show server information
-quickmcp info <name>
+makemcp info <name>
 
 # Discover servers (filesystem and/or network)
-quickmcp discover [--scan-filesystem] [--scan-network]
+makemcp discover [--scan-filesystem] [--scan-network]
 
 # Export configuration for Gleitzeit
-quickmcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
+makemcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
 ```
 
 ### Server Metadata
 
-QuickMCP servers can provide metadata via the `--info` flag:
+MakeMCP servers can provide metadata via the `--info` flag:
 
 ```bash
 # Get server information
@@ -604,15 +604,15 @@ This returns JSON with server details:
 
 ## Integration with Gleitzeit
 
-QuickMCP servers work seamlessly with [Gleitzeit](https://github.com/leifmarkthaler/gleitzeit):
+MakeMCP servers work seamlessly with [Gleitzeit](https://github.com/leifmarkthaler/gleitzeit):
 
 ### Automatic Configuration Export
 
-QuickMCP can export your registered servers directly to Gleitzeit configuration:
+MakeMCP can export your registered servers directly to Gleitzeit configuration:
 
 ```bash
 # Export all registered servers to Gleitzeit config
-quickmcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
+makemcp export --format yaml > ~/.gleitzeit/mcp_servers.yaml
 
 # The generated config will look like:
 ```
@@ -629,14 +629,14 @@ mcp:
 
 ### Manual Configuration
 
-You can also manually configure QuickMCP servers in Gleitzeit:
+You can also manually configure MakeMCP servers in Gleitzeit:
 
 ```yaml
 # ~/.gleitzeit/config.yaml
 mcp:
   servers:
     # Stdio server (launched as child process)
-    - name: "my-quickmcp-server"
+    - name: "my-makemcp-server"
       connection_type: "stdio"
       command: ["python", "path/to/my_server.py"]
       working_dir: "${HOME}/my-servers"
@@ -653,14 +653,14 @@ mcp:
 
 ### Discovery Workflow
 
-1. **Register your servers** with QuickMCP:
+1. **Register your servers** with MakeMCP:
    ```bash
-   quickmcp register my-server "python my_server.py" --tool-prefix "my."
+   makemcp register my-server "python my_server.py" --tool-prefix "my."
    ```
 
 2. **Export to Gleitzeit**:
    ```bash
-   quickmcp export > ~/.gleitzeit/mcp_servers.yaml
+   makemcp export > ~/.gleitzeit/mcp_servers.yaml
    ```
 
 3. **Use in Gleitzeit workflows**:
@@ -679,8 +679,8 @@ mcp:
 For SSE/HTTP servers, Gleitzeit can discover them automatically via UDP multicast:
 
 ```python
-# Your QuickMCP server broadcasts automatically
-server = QuickMCPServer("my-server")
+# Your MakeMCP server broadcasts automatically
+server = MakeMCPServer("my-server")
 server.run(transport="sse", port=8080)  # Broadcasts on network
 
 # Gleitzeit can discover it
@@ -689,7 +689,7 @@ server.run(transport="sse", port=8080)  # Broadcasts on network
 
 ## API Reference
 
-### QuickMCPServer
+### MakeMCPServer
 
 Main server class for creating MCP servers.
 
@@ -704,7 +704,7 @@ Main server class for creating MCP servers.
 
 ### Types
 
-QuickMCP provides several helpful type definitions:
+MakeMCP provides several helpful type definitions:
 
 - `ToolResult` - Standard result format for tools
 - `ResourceContent` - Content returned by resources
@@ -714,7 +714,7 @@ QuickMCP provides several helpful type definitions:
 
 ## Testing
 
-QuickMCP includes a comprehensive test suite. Run tests using:
+MakeMCP includes a comprehensive test suite. Run tests using:
 
 ```bash
 # Using the test runner script (auto-detects uv)
@@ -730,12 +730,12 @@ pytest tests/ -v
 uv run pytest tests/test_factory.py -v
 
 # Run with coverage
-uv run pytest tests/ --cov=src/quickmcp --cov-report=html
+uv run pytest tests/ --cov=src/makemcp --cov-report=html
 ```
 
 ## Dependency Management
 
-QuickMCP uses smart dependency detection and can automatically use `uv` for faster installations:
+MakeMCP uses smart dependency detection and can automatically use `uv` for faster installations:
 
 ### Automatic Detection
 
@@ -747,7 +747,7 @@ When the MCP Factory detects missing dependencies, it will:
 ### Example with Missing Dependencies
 
 ```python
-# If numpy is not installed, QuickMCP will detect it
+# If numpy is not installed, MakeMCP will detect it
 import numpy as np
 
 def calculate_mean(data: list) -> float:
@@ -767,7 +767,7 @@ Missing dependencies detected:
 
 ### Managing Dependencies
 
-For projects using QuickMCP:
+For projects using MakeMCP:
 
 ```bash
 # Fast dependency installation with uv
@@ -786,8 +786,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ```bash
 # Clone the repository
-git clone https://github.com/leifmarkthaler/quickmcp.git
-cd quickmcp
+git clone https://github.com/leifmarkthaler/makemcp.git
+cd makemcp
 
 # Use the setup script (recommended)
 ./setup.sh
@@ -808,7 +808,7 @@ MIT License - see LICENSE file for details.
 ## Full Feature Set
 
 <details>
-<summary>All features QuickMCP supports</summary>
+<summary>All features MakeMCP supports</summary>
 
 - ✅ **Tools** - Functions that LLMs can call
 - ✅ **Resources** - Data/content LLMs can access  
@@ -836,12 +836,12 @@ MIT License - see LICENSE file for details.
 
 ### Official MCP SDK Compatibility
 
-QuickMCP is specifically designed to work with the **official MCP Python SDK** (`mcp` package). It is **not** compatible with:
+MakeMCP is specifically designed to work with the **official MCP Python SDK** (`mcp` package). It is **not** compatible with:
 - FastMCP or other third-party implementations
 - Older or experimental MCP libraries
 
-The official SDK uses a handler-based approach for registering tools, resources, and prompts. QuickMCP provides a decorator-based interface that internally manages these handlers for you.
+The official SDK uses a handler-based approach for registering tools, resources, and prompts. MakeMCP provides a decorator-based interface that internally manages these handlers for you.
 
 ## Acknowledgments
 
-QuickMCP is built on top of the official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) and aims to make MCP server development more accessible and enjoyable.
+MakeMCP is built on top of the official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) and aims to make MCP server development more accessible and enjoyable.

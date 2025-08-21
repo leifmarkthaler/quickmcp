@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch, MagicMock
 import subprocess
 import sys
 
-from quickmcp.registry import (
+from makemcp.registry import (
     ServerRegistration,
     ServerRegistry,
     register_server,
@@ -105,7 +105,7 @@ class TestServerRegistry:
             with patch("pathlib.Path.mkdir"):
                 with patch("pathlib.Path.exists", return_value=False):
                     registry = ServerRegistry()
-                    expected_path = Path("/home/test/.quickmcp/registry.json")
+                    expected_path = Path("/home/test/.makemcp/registry.json")
                     assert str(registry.registry_path) == str(expected_path)
     
     def test_register_server(self, tmp_path):
@@ -273,19 +273,19 @@ class TestServerRegistry:
 class TestAutoDiscovery:
     """Test auto-discovery functionality."""
     
-    def test_is_quickmcp_server(self, tmp_path):
-        """Test detecting QuickMCP servers."""
+    def test_is_makemcp_server(self, tmp_path):
+        """Test detecting MakeMCP servers."""
         registry = ServerRegistry()
         
-        # Create QuickMCP server file
+        # Create MakeMCP server file
         server_file = tmp_path / "mcp_server.py"
         server_file.write_text("""
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer("test")
+server = MakeMCPServer("test")
 """)
         
-        assert registry._is_quickmcp_server(server_file) is True
+        assert registry._is_makemcp_server(server_file) is True
         
         # Create non-MCP file
         other_file = tmp_path / "other.py"
@@ -294,7 +294,7 @@ def main():
     print("Hello")
 """)
         
-        assert registry._is_quickmcp_server(other_file) is False
+        assert registry._is_makemcp_server(other_file) is False
     
     def test_extract_server_info_with_info_flag(self, tmp_path):
         """Test extracting server info via --info flag."""
@@ -326,7 +326,7 @@ if "--info" in sys.argv:
         server_file = tmp_path / "server.py"
         server_file.write_text("""
 # QuickMCP server without --info support
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 """)
         
         registry = ServerRegistry()
@@ -349,14 +349,14 @@ from quickmcp import QuickMCPServer
         
         # Create QuickMCP server
         (servers_dir / "mcp1.py").write_text("""
-from quickmcp import QuickMCPServer
-server = QuickMCPServer("mcp1")
+from makemcp import MakeMCPServer
+server = MakeMCPServer("mcp1")
 """)
         
         # Create another server
         (servers_dir / "mcp2.py").write_text("""
-from quickmcp import QuickMCPServer
-server = QuickMCPServer("mcp2")
+from makemcp import MakeMCPServer
+server = MakeMCPServer("mcp2")
 """)
         
         # Create non-MCP file
@@ -390,7 +390,7 @@ class TestHelperFunctions:
     
     def test_register_server_function(self, tmp_path):
         """Test register_server helper function."""
-        with patch('quickmcp.registry.ServerRegistry') as MockRegistry:
+        with patch('makemcp.registry.ServerRegistry') as MockRegistry:
             mock_instance = MagicMock()
             MockRegistry.return_value = mock_instance
             
@@ -413,7 +413,7 @@ class TestHelperFunctions:
     
     def test_list_servers_function(self):
         """Test list_servers helper function."""
-        with patch('quickmcp.registry.ServerRegistry') as MockRegistry:
+        with patch('makemcp.registry.ServerRegistry') as MockRegistry:
             mock_instance = MagicMock()
             mock_instance.list.return_value = [
                 ServerRegistration("s1", "Server 1", ["cmd1"]),
@@ -430,7 +430,7 @@ class TestHelperFunctions:
     @patch('builtins.print')
     def test_export_gleitzeit_config_to_stdout(self, mock_print):
         """Test exporting config to stdout."""
-        with patch('quickmcp.registry.ServerRegistry') as MockRegistry:
+        with patch('makemcp.registry.ServerRegistry') as MockRegistry:
             mock_instance = MagicMock()
             mock_instance.to_gleitzeit_config.return_value = {"mcp": {"servers": []}}
             MockRegistry.return_value = mock_instance
@@ -446,7 +446,7 @@ class TestHelperFunctions:
         """Test exporting config to file."""
         output_file = tmp_path / "config.yaml"
         
-        with patch('quickmcp.registry.ServerRegistry') as MockRegistry:
+        with patch('makemcp.registry.ServerRegistry') as MockRegistry:
             mock_instance = MagicMock()
             mock_instance.to_gleitzeit_config.return_value = {"mcp": {"servers": []}}
             MockRegistry.return_value = mock_instance

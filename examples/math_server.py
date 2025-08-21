@@ -10,7 +10,7 @@ import math
 import random
 import statistics
 from typing import List, Union, Optional
-from quickmcp import QuickMCPServer
+from mcplite import QuickMCPServer
 
 # Create the server
 server = QuickMCPServer(

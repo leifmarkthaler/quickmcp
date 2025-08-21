@@ -9,9 +9,9 @@ from enum import Enum
 from dataclasses import dataclass
 from pathlib import Path
 
-from quickmcp.factory.type_conversion import TypeConverter
-from quickmcp.factory.config import FactoryConfig
-from quickmcp.factory.errors import TypeConversionError
+from makemcp.factory.type_conversion import TypeConverter
+from makemcp.factory.config import FactoryConfig
+from makemcp.factory.errors import TypeConversionError
 
 
 class Color(Enum):
@@ -330,7 +330,7 @@ class TestTypeConverterIntegration:
     
     def test_with_factory_config(self):
         """Test TypeConverter with different factory configurations."""
-        from quickmcp.factory.config import create_safe_config, create_permissive_config
+        from makemcp.factory.config import create_safe_config, create_permissive_config
         
         # Safe config should be strict
         safe_converter = TypeConverter(create_safe_config())

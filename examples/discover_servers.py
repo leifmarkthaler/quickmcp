@@ -9,7 +9,7 @@ discovered servers in real-time.
 import asyncio
 import json
 from datetime import datetime
-from quickmcp.autodiscovery import DiscoveryListener, discover_servers
+from mcplite.autodiscovery import DiscoveryListener, discover_servers
 import argparse
 import logging
 

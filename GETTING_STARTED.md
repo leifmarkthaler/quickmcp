@@ -1,4 +1,4 @@
-# Getting Started with QuickMCP
+# Getting Started with MakeMCP
 
 ## Installation (10 seconds)
 
@@ -6,8 +6,8 @@
 # Get uv (if you don't have it) - makes everything 10-100x faster
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install QuickMCP
-uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
+# Install MakeMCP
+uv pip install git+https://github.com/leifmarkthaler/makemcp.git
 ```
 
 ## Your First Server (30 seconds)
@@ -15,7 +15,7 @@ uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
 Create `server.py`:
 
 ```python
-from quickmcp.quick import tool, run
+from makemcp.quick import tool, run
 
 @tool
 def hello(name: str) -> str:
@@ -42,7 +42,7 @@ That's it! You have a working MCP server with two tools.
 Have a Python file with functions? Turn it into an MCP server instantly:
 
 ```python
-from quickmcp.quick import from_file
+from makemcp.quick import from_file
 
 # Any Python file becomes a server
 from_file("my_utils.py").run()
@@ -58,7 +58,7 @@ mcp-factory my_utils.py
 ### Async Functions (Just Works™)
 
 ```python
-from quickmcp.quick import tool, run
+from makemcp.quick import tool, run
 import asyncio
 
 @tool
@@ -78,7 +78,7 @@ run()  # Both sync and async work together
 ### Working with Files
 
 ```python
-from quickmcp.quick import tool, run
+from makemcp.quick import tool, run
 from pathlib import Path
 
 @tool
@@ -103,7 +103,7 @@ run()
 ### Web Requests
 
 ```python
-from quickmcp.quick import tool, run
+from makemcp.quick import tool, run
 import urllib.request
 import json
 
@@ -149,6 +149,6 @@ run()
 
 - **Examples**: `/examples` folder has many examples
 - **Docs**: [README.md](README.md) has full documentation
-- **Issues**: [GitHub Issues](https://github.com/leifmarkthaler/quickmcp/issues)
+- **Issues**: [GitHub Issues](https://github.com/leifmarkthaler/makemcp/issues)
 
 Remember: If something feels complicated, there's probably an easier way!

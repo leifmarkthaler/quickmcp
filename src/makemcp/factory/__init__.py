@@ -1,5 +1,5 @@
 """
-QuickMCP Factory - Automatically generate MCP servers from Python code.
+MakeMCP Factory - Automatically generate MCP servers from Python code.
 
 This package provides a refactored, modular architecture for creating MCP servers
 from existing Python code with comprehensive dependency analysis, safe type conversion,
@@ -14,7 +14,7 @@ Key Components:
 
 Example Usage:
     ```python
-    from quickmcp.factory import create_mcp_from_module, FactoryConfig
+    from makemcp.factory import create_mcp_from_module, FactoryConfig
     
     # Simple usage
     server = create_mcp_from_module("my_utils.py")
@@ -24,7 +24,7 @@ Example Usage:
     server = create_mcp_from_module("my_utils.py", config=config)
     
     # Check dependencies first
-    from quickmcp.factory import print_dependency_report
+    from makemcp.factory import print_dependency_report
     print_dependency_report("my_utils.py")
     ```
 """
@@ -59,7 +59,7 @@ from .utils import (
 
 # Version information
 __version__ = "2.0.0"
-__author__ = "QuickMCP Team"
+__author__ = "MakeMCP Team"
 
 # Public API
 __all__ = [

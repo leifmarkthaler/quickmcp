@@ -1,5 +1,5 @@
 """
-QuickMCP Server Registry - Register and discover QuickMCP servers
+MakeMCP Server Registry - Register and discover MakeMCP servers
 """
 
 import json
@@ -13,7 +13,7 @@ import sys
 
 @dataclass
 class ServerRegistration:
-    """Registration info for a QuickMCP server."""
+    """Registration info for a MakeMCP server."""
     name: str
     description: str
     command: List[str]  # Command to run the server
@@ -33,18 +33,18 @@ class ServerRegistration:
 
 
 class ServerRegistry:
-    """Registry for QuickMCP servers that can be launched via stdio."""
+    """Registry for MakeMCP servers that can be launched via stdio."""
     
     def __init__(self, registry_path: Optional[Path] = None):
         """
         Initialize the server registry.
         
         Args:
-            registry_path: Path to registry file (defaults to ~/.quickmcp/registry.json)
+            registry_path: Path to registry file (defaults to ~/.makemcp/registry.json)
         """
         if registry_path is None:
             home = Path.home()
-            registry_dir = home / ".quickmcp"
+            registry_dir = home / ".makemcp"
             registry_dir.mkdir(parents=True, exist_ok=True)
             registry_path = registry_dir / "registry.json"
         
@@ -163,7 +163,7 @@ class ServerRegistry:
     
     def auto_discover(self, search_paths: Optional[List[Path]] = None) -> List[ServerRegistration]:
         """
-        Auto-discover QuickMCP servers in the filesystem.
+        Auto-discover MakeMCP servers in the filesystem.
         
         Args:
             search_paths: Paths to search (defaults to current directory and common locations)
@@ -174,9 +174,9 @@ class ServerRegistry:
         if search_paths is None:
             search_paths = [
                 Path.cwd(),
-                Path.home() / "quickmcp",
+                Path.home() / "makemcp",
                 Path.home() / "mcp-servers",
-                Path("/usr/local/share/quickmcp"),
+                Path("/usr/local/share/makemcp"),
             ]
         
         discovered = []
@@ -185,9 +185,9 @@ class ServerRegistry:
             if not base_path.exists():
                 continue
             
-            # Look for Python files that might be QuickMCP servers
+            # Look for Python files that might be MakeMCP servers
             for py_file in base_path.rglob("*.py"):
-                if self._is_quickmcp_server(py_file):
+                if self._is_makemcp_server(py_file):
                     # Extract server info from the file
                     info = self._extract_server_info(py_file)
                     if info:
@@ -195,12 +195,12 @@ class ServerRegistry:
         
         return discovered
     
-    def _is_quickmcp_server(self, file_path: Path) -> bool:
-        """Check if a Python file is a QuickMCP server."""
+    def _is_makemcp_server(self, file_path: Path) -> bool:
+        """Check if a Python file is a MakeMCP server."""
         try:
             with open(file_path, 'r') as f:
                 content = f.read(1000)  # Read first 1000 chars
-                return "QuickMCPServer" in content or "from quickmcp import" in content
+                return "MakeMCPServer" in content or "from makemcp import" in content
         except:
             return False
     
@@ -232,7 +232,7 @@ class ServerRegistry:
         # Fallback: create basic registration
         return ServerRegistration(
             name=file_path.stem,
-            description=f"QuickMCP server: {file_path.name}",
+            description=f"MakeMCP server: {file_path.name}",
             command=[sys.executable, str(file_path)],
             working_dir=str(file_path.parent)
         )

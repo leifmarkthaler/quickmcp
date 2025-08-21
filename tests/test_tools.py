@@ -3,7 +3,7 @@ Tests for QuickMCP tool functionality
 """
 
 import pytest
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 class TestToolRegistration:

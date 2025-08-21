@@ -1,9 +1,9 @@
 """
-Tests for QuickMCPServer basic functionality
+Tests for MakeMCPServer basic functionality
 """
 
 import pytest
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 class TestServerCreation:
@@ -11,7 +11,7 @@ class TestServerCreation:
     
     def test_create_basic_server(self):
         """Test creating a basic server."""
-        server = QuickMCPServer("test-server")
+        server = MakeMCPServer("test-server")
         
         assert server.name == "test-server"
         assert server.version == "1.0.0"
@@ -22,7 +22,7 @@ class TestServerCreation:
     
     def test_create_server_with_options(self):
         """Test creating a server with custom options."""
-        server = QuickMCPServer(
+        server = MakeMCPServer(
             name="custom-server",
             version="2.0.0",
             description="Custom test server",
@@ -48,7 +48,7 @@ class TestServerCreation:
         """Test server string representation."""
         repr_str = repr(simple_server)
         
-        assert "QuickMCPServer" in repr_str
+        assert "MakeMCPServer" in repr_str
         assert "test-server" in repr_str
         assert "1.0.0" in repr_str
 

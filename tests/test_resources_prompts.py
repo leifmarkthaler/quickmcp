@@ -3,7 +3,7 @@ Tests for QuickMCP resources and prompts
 """
 
 import pytest
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 class TestResourceRegistration:

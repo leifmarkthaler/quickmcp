@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-QuickMCP Factory CLI - Generate MCP servers from Python code
+MakeMCP Factory CLI - Generate MCP servers from Python code
 """
 
 import argparse

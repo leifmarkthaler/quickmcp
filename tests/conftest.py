@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for QuickMCP tests
+Pytest configuration and shared fixtures for MCPLite tests
 """
 
 import pytest
@@ -10,7 +10,7 @@ from pathlib import Path
 # Add src to path for development testing
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def event_loop():
 @pytest.fixture
 def simple_server():
     """Create a simple test server."""
-    server = QuickMCPServer(
+    server = MakeMCPServer(
         name="test-server",
         version="1.0.0",
         description="Test server for unit tests"
@@ -35,7 +35,7 @@ def simple_server():
 @pytest.fixture
 def server_with_tools():
     """Create a server with some test tools."""
-    server = QuickMCPServer("test-server-tools")
+    server = MakeMCPServer("test-server-tools")
     
     @server.tool()
     def add(a: float, b: float) -> float:
@@ -58,7 +58,7 @@ def server_with_tools():
 @pytest.fixture
 def server_with_resources():
     """Create a server with test resources."""
-    server = QuickMCPServer("test-server-resources")
+    server = MakeMCPServer("test-server-resources")
     
     test_data = {"key1": "value1", "key2": "value2"}
     
@@ -78,7 +78,7 @@ def server_with_resources():
 @pytest.fixture
 def server_with_prompts():
     """Create a server with test prompts."""
-    server = QuickMCPServer("test-server-prompts")
+    server = MakeMCPServer("test-server-prompts")
     
     @server.prompt()
     def test_prompt(topic: str) -> str:
@@ -96,7 +96,7 @@ def server_with_prompts():
 @pytest.fixture
 async def async_server():
     """Create a server with async operations."""
-    server = QuickMCPServer("test-async-server")
+    server = MakeMCPServer("test-async-server")
     
     @server.tool()
     async def async_add(a: float, b: float) -> float:
@@ -147,7 +147,7 @@ def mock_mcp_server(monkeypatch):
                 return func
             return decorator
     
-    # Patch the Server import in quickmcp.server
-    monkeypatch.setattr("quickmcp.server.Server", MockMCPServer)
+    # Patch the Server import in mcplite.server
+    monkeypatch.setattr("mcplite.server.Server", MockMCPServer)
     
     return MockMCPServer

@@ -7,9 +7,9 @@ import tempfile
 from pathlib import Path
 from typing import List, Set
 
-from quickmcp.factory.import_analyzer import ImportAnalyzer
-from quickmcp.factory.config import FactoryConfig
-from quickmcp.factory.errors import MissingDependency
+from makemcp.factory.import_analyzer import ImportAnalyzer
+from makemcp.factory.config import FactoryConfig
+from makemcp.factory.errors import MissingDependency
 
 
 class TestImportAnalyzer:
@@ -467,7 +467,7 @@ class TestImportAnalyzerIntegration:
     
     def test_with_factory_config(self, tmp_path):
         """Test ImportAnalyzer with different factory configurations."""
-        from quickmcp.factory.config import create_safe_config, create_permissive_config
+        from makemcp.factory.config import create_safe_config, create_permissive_config
         
         test_file = tmp_path / "test.py"
         test_file.write_text("""

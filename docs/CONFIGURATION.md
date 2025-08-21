@@ -1,6 +1,6 @@
-# QuickMCP Configuration Guide
+# MakeMCP Configuration Guide
 
-This guide covers all configuration options available in QuickMCP, including server configuration, factory configuration, and environment variables.
+This guide covers all configuration options available in MakeMCP, including server configuration, factory configuration, and environment variables.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ The MCP Factory provides extensive configuration options for controlling behavio
 ### FactoryConfig Class
 
 ```python
-from quickmcp.factory import FactoryConfig
+from makemcp.factory import FactoryConfig
 
 config = FactoryConfig(
     # Dependency checking
@@ -60,7 +60,7 @@ config = FactoryConfig(
 For production environments with strict security requirements:
 
 ```python
-from quickmcp.factory import create_safe_config
+from makemcp.factory import create_safe_config
 
 config = create_safe_config()
 # Features:
@@ -76,7 +76,7 @@ config = create_safe_config()
 For development and debugging:
 
 ```python
-from quickmcp.factory import create_development_config
+from makemcp.factory import create_development_config
 
 config = create_development_config()
 # Features:
@@ -92,7 +92,7 @@ config = create_development_config()
 For maximum compatibility:
 
 ```python
-from quickmcp.factory import create_permissive_config
+from makemcp.factory import create_permissive_config
 
 config = create_permissive_config()
 # Features:
@@ -121,12 +121,12 @@ custom_config = FactoryConfig(
 
 ## Server Configuration
 
-### QuickMCPServer Options
+### MakeMCPServer Options
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer(
+server = MakeMCPServer(
     name="my-server",              # Server name (required)
     version="1.0.0",               # Server version
     description="My MCP server",   # Server description
@@ -172,10 +172,10 @@ server.run(
 ### Registry Configuration
 
 ```python
-from quickmcp.registry import Registry
+from makemcp.registry import Registry
 
 registry = Registry(
-    registry_path="~/.quickmcp/registry.json",  # Registry file location
+    registry_path="~/.makemcp/registry.json",  # Registry file location
     auto_save=True,                            # Auto-save changes
     validate_on_load=True                      # Validate entries on load
 )
@@ -184,7 +184,7 @@ registry = Registry(
 ### Network Discovery
 
 ```python
-from quickmcp.autodiscovery import NetworkDiscovery
+from makemcp.autodiscovery import NetworkDiscovery
 
 discovery = NetworkDiscovery(
     multicast_group="239.255.41.42",  # Multicast group
@@ -197,14 +197,14 @@ discovery = NetworkDiscovery(
 
 ## Environment Variables
 
-QuickMCP respects the following environment variables:
+MakeMCP respects the following environment variables:
 
 ### Core Settings
 
 ```bash
-# QuickMCP settings
-QUICKMCP_HOME="~/.quickmcp"          # QuickMCP home directory
-QUICKMCP_REGISTRY="~/.quickmcp/registry.json"  # Registry location
+# MakeMCP settings
+QUICKMCP_HOME="~/.makemcp"          # MakeMCP home directory
+QUICKMCP_REGISTRY="~/.makemcp/registry.json"  # Registry location
 QUICKMCP_LOG_LEVEL="INFO"            # Logging level
 QUICKMCP_DEBUG="false"               # Debug mode
 
@@ -242,10 +242,10 @@ QUICKMCP_VERBOSE="false"            # Verbose output
 
 ### Project Configuration
 
-Create a `.quickmcp.yaml` in your project root:
+Create a `.makemcp.yaml` in your project root:
 
 ```yaml
-# .quickmcp.yaml
+# .makemcp.yaml
 server:
   name: "my-project-server"
   version: "1.0.0"
@@ -276,10 +276,10 @@ Load configuration:
 
 ```python
 import yaml
-from quickmcp.factory import FactoryConfig
+from makemcp.factory import FactoryConfig
 
 # Load from file
-with open(".quickmcp.yaml") as f:
+with open(".makemcp.yaml") as f:
     config_data = yaml.safe_load(f)
 
 # Create factory config
@@ -288,10 +288,10 @@ factory_config = FactoryConfig(**config_data.get("factory", {}))
 
 ### User Configuration
 
-Global user settings in `~/.quickmcp/config.yaml`:
+Global user settings in `~/.makemcp/config.yaml`:
 
 ```yaml
-# ~/.quickmcp/config.yaml
+# ~/.makemcp/config.yaml
 defaults:
   factory:
     check_dependencies: true
@@ -318,8 +318,8 @@ development:
 Configuration is applied in the following order (later overrides earlier):
 
 1. **Default values** - Built-in defaults
-2. **User config** - `~/.quickmcp/config.yaml`
-3. **Project config** - `.quickmcp.yaml` in project root
+2. **User config** - `~/.makemcp/config.yaml`
+3. **Project config** - `.makemcp.yaml` in project root
 4. **Environment variables** - `QUICKMCP_*` variables
 5. **Code configuration** - Explicit configuration in code
 6. **Command-line arguments** - CLI flags (highest priority)

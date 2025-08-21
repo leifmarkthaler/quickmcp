@@ -1,4 +1,4 @@
-# QuickMCP - 2 Minute Quickstart
+# MakeMCP - 2 Minute Quickstart
 
 Get an MCP server running in under 2 minutes!
 
@@ -6,7 +6,7 @@ Get an MCP server running in under 2 minutes!
 
 ```bash
 # Fast install with uv
-uv pip install git+https://github.com/leifmarkthaler/quickmcp.git
+uv pip install git+https://github.com/leifmarkthaler/makemcp.git
 ```
 
 Don't have uv? `curl -LsSf https://astral.sh/uv/install.sh | sh` (it's worth it - 10-100x faster)
@@ -16,9 +16,9 @@ Don't have uv? `curl -LsSf https://astral.sh/uv/install.sh | sh` (it's worth it 
 Create a file `hello_server.py`:
 
 ```python
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
-server = QuickMCPServer("hello")
+server = MakeMCPServer("hello")
 
 @server.tool()
 def greet(name: str) -> str:
@@ -59,7 +59,7 @@ Have existing Python code? No need to rewrite anything:
 mcp-factory my_utils.py
 
 # Or in Python
-from quickmcp.factory import create_mcp_from_module
+from makemcp.factory import create_mcp_from_module
 server = create_mcp_from_module("my_utils.py")
 ```
 
@@ -140,7 +140,7 @@ async def fetch_url(url: str) -> dict:
 
 **Import Error?**
 ```bash
-pip install quickmcp
+pip install makemcp
 ```
 
 **Missing dependencies?**
@@ -153,7 +153,7 @@ The factory will tell you exactly what to install:
 **Need help?**
 - Examples: `/examples` folder
 - Docs: [README.md](README.md)
-- Issues: [GitHub Issues](https://github.com/leifmarkthaler/quickmcp/issues)
+- Issues: [GitHub Issues](https://github.com/leifmarkthaler/makemcp/issues)
 
 ## Next Steps
 
@@ -163,4 +163,4 @@ The factory will tell you exactly what to install:
 
 ---
 
-**Remember**: QuickMCP is designed to be simple. If something feels complicated, we probably have an easier way. Just ask!
+**Remember**: MakeMCP is designed to be simple. If something feels complicated, we probably have an easier way. Just ask!

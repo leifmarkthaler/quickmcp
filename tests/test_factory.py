@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 import inspect
 import asyncio
 
-from quickmcp.factory import (
+from makemcp.factory import (
     MCPFactory,
     create_mcp_from_module,
     create_mcp_from_object,
@@ -20,7 +20,7 @@ from quickmcp.factory import (
     FactoryConfig,
     create_safe_config
 )
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 # Test fixtures and sample code
@@ -50,7 +50,7 @@ MY_CONSTANT = 42
 DECORATED_MODULE_CODE = '''
 """Module with decorated functions."""
 
-from quickmcp.factory import mcp_tool
+from makemcp.factory import mcp_tool
 
 @mcp_tool
 def decorated_func1(x: int) -> int:
@@ -159,7 +159,7 @@ class TestMCPFactory:
         factory = MCPFactory(name="test-server")
         server = factory.from_module(str(module_file))
         
-        assert isinstance(server, QuickMCPServer)
+        assert isinstance(server, MakeMCPServer)
         assert server.name == "test-server"
         assert server.version == "1.0.0"
         
@@ -345,7 +345,7 @@ class TestCreateHelpers:
             auto_run=False
         )
         
-        assert isinstance(server, QuickMCPServer)
+        assert isinstance(server, MakeMCPServer)
         assert server.name == "helper-test"
         assert "public_function" in server.list_tools()
     
@@ -481,7 +481,7 @@ from pathlib import Path
     
     def test_class_that_cannot_instantiate(self):
         """Test with class that cannot be instantiated."""
-        from quickmcp.factory.errors import FunctionExtractionError
+        from makemcp.factory.errors import FunctionExtractionError
         
         class BrokenClass:
             def __init__(self):

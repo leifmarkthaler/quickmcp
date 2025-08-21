@@ -12,7 +12,7 @@ To test with a client:
     mcp-client stdio -- python simple_server.py
 """
 
-from quickmcp import QuickMCPServer
+from mcplite import QuickMCPServer
 from datetime import datetime
 from typing import Dict, Any, List
 import json

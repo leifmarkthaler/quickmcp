@@ -18,7 +18,7 @@ import re
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from quickmcp import create_mcp_from_module
+from mcplite import create_mcp_from_module
 
 
 # Mock async HTTP functions (in real use, would use aiohttp or httpx)

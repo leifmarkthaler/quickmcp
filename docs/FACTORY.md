@@ -1,6 +1,6 @@
-# QuickMCP Factory Documentation
+# MakeMCP Factory Documentation
 
-The QuickMCP Factory is a powerful system for automatically generating MCP servers from existing Python code. It provides intelligent dependency analysis, safe type conversion, and flexible configuration options.
+The MakeMCP Factory is a powerful system for automatically generating MCP servers from existing Python code. It provides intelligent dependency analysis, safe type conversion, and flexible configuration options.
 
 ## Table of Contents
 
@@ -29,7 +29,7 @@ The MCP Factory allows you to:
 ### Basic Usage
 
 ```python
-from quickmcp.factory import create_mcp_from_module
+from makemcp.factory import create_mcp_from_module
 
 # Create server from a Python file
 server = create_mcp_from_module("my_utils.py")
@@ -56,7 +56,7 @@ mcp-factory my_utils.py --include-private
 #### From Module/File
 
 ```python
-from quickmcp.factory import MCPFactory
+from makemcp.factory import MCPFactory
 
 factory = MCPFactory(name="my-server")
 
@@ -114,7 +114,7 @@ server = factory.from_functions(functions)
 #### From Decorated Functions
 
 ```python
-from quickmcp.factory import mcp_tool
+from makemcp.factory import mcp_tool
 
 @mcp_tool
 def important_function(x: int) -> int:
@@ -176,7 +176,7 @@ server = factory.from_module(__file__)
 The factory uses a powerful configuration system for fine-grained control:
 
 ```python
-from quickmcp.factory import FactoryConfig, MCPFactory
+from makemcp.factory import FactoryConfig, MCPFactory
 
 # Create custom configuration
 config = FactoryConfig(
@@ -211,7 +211,7 @@ factory = MCPFactory(config=config)
 ### Pre-configured Configurations
 
 ```python
-from quickmcp.factory import (
+from makemcp.factory import (
     create_safe_config,
     create_development_config,
     create_permissive_config
@@ -241,7 +241,7 @@ factory = MCPFactory(config=safe_config)
 ### Convenience Factory Functions
 
 ```python
-from quickmcp.factory import (
+from makemcp.factory import (
     create_safe_factory,
     create_factory_for_development,
     create_factory_with_config
@@ -265,7 +265,7 @@ custom_factory = create_factory_with_config(
 The factory analyzes Python files to detect missing dependencies:
 
 ```python
-from quickmcp.factory import analyze_dependencies, check_dependencies
+from makemcp.factory import analyze_dependencies, check_dependencies
 
 # Analyze a file
 missing = analyze_dependencies("my_module.py")
@@ -330,7 +330,7 @@ except MissingDependencyError as e:
 ### Print Dependency Report
 
 ```python
-from quickmcp.factory import print_dependency_report
+from makemcp.factory import print_dependency_report
 
 print_dependency_report("my_module.py")
 # Output:
@@ -356,7 +356,7 @@ print_dependency_report("my_module.py")
 The factory includes a sophisticated type conversion system:
 
 ```python
-from quickmcp.factory import TypeConverter
+from makemcp.factory import TypeConverter
 
 converter = TypeConverter()
 
@@ -393,7 +393,7 @@ result = converter.convert_value("/home/user", Path)
 ### Comprehensive Error Types
 
 ```python
-from quickmcp.factory import (
+from makemcp.factory import (
     MissingDependencyError,
     ModuleLoadError,
     TypeConversionError,
@@ -422,7 +422,7 @@ except TypeConversionError as e:
 ### Error Message Formatting
 
 ```python
-from quickmcp.factory import handle_factory_error
+from makemcp.factory import handle_factory_error
 
 try:
     server = factory.from_module("my_module.py")
@@ -496,7 +496,7 @@ server = factory.from_class(StatefulProcessor)
 The factory is organized into focused modules:
 
 ```
-quickmcp/factory/
+makemcp/factory/
 ├── __init__.py          # Public API
 ├── config.py            # Configuration system
 ├── core.py              # Core factory classes
@@ -560,10 +560,10 @@ If you were using the old monolithic factory:
 
 ```python
 # Old way (still works)
-from quickmcp.factory_old import MCPFactory
+from makemcp.factory_old import MCPFactory
 
 # New way (recommended)
-from quickmcp.factory import MCPFactory, FactoryConfig
+from makemcp.factory import MCPFactory, FactoryConfig
 
 # With configuration
 config = FactoryConfig(check_dependencies=True)

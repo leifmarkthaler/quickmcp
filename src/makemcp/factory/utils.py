@@ -32,7 +32,7 @@ def create_mcp_from_module(
         config: Factory configuration (defaults to DEFAULT_CONFIG)
         
     Returns:
-        QuickMCPServer instance
+        MakeMCPServer instance
     
     Raises:
         MissingDependencyError: If required dependencies are missing
@@ -69,7 +69,7 @@ def create_mcp_from_object(obj: Any, server_name: Optional[str] = None, config: 
         config: Factory configuration
         
     Returns:
-        QuickMCPServer instance
+        MakeMCPServer instance
     """
     import inspect
     

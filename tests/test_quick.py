@@ -9,14 +9,14 @@ import asyncio
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-from quickmcp.quick import (
+from makemcp.quick import (
     server,
     from_file,
     from_object,
     run,
     tool
 )
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 class TestQuickServer:
@@ -25,13 +25,13 @@ class TestQuickServer:
     def test_server_creation_default(self):
         """Test creating a server with default name."""
         s = server()
-        assert isinstance(s, QuickMCPServer)
-        assert s.name == "quickmcp-server"
+        assert isinstance(s, MakeMCPServer)
+        assert s.name == "makemcp-server"
     
     def test_server_creation_custom_name(self):
         """Test creating a server with custom name."""
         s = server("my-test-server")
-        assert isinstance(s, QuickMCPServer)
+        assert isinstance(s, MakeMCPServer)
         assert s.name == "my-test-server"
     
     def test_server_can_add_tools(self):
@@ -69,7 +69,7 @@ def _private_func():
         # Create server from file
         s = from_file(str(test_file))
         
-        assert isinstance(s, QuickMCPServer)
+        assert isinstance(s, MakeMCPServer)
         assert "test-module-mcp" in s.name
         
         tools = s.list_tools()
@@ -139,7 +139,7 @@ class TestFromObject:
         
         s = from_object(functions)
         
-        assert isinstance(s, QuickMCPServer)
+        assert isinstance(s, MakeMCPServer)
         tools = s.list_tools()
         assert "add" in tools
         assert "multiply" in tools
@@ -260,7 +260,7 @@ class TestToolDecorator:
 class TestRun:
     """Test the run() function."""
     
-    @patch('quickmcp.quick.server')
+    @patch('makemcp.quick.server')
     def test_run_no_args(self, mock_server):
         """Test run() with no arguments."""
         mock_instance = Mock()
@@ -278,7 +278,7 @@ class TestRun:
                     port=8000
                 )
     
-    @patch('quickmcp.quick.from_file')
+    @patch('makemcp.quick.from_file')
     def test_run_with_file(self, mock_from_file):
         """Test run() with file path."""
         mock_server = Mock()
@@ -290,7 +290,7 @@ class TestRun:
             mock_from_file.assert_called_once_with("test.py", name="test-server")
             mock_server.run.assert_called_once()
     
-    @patch('quickmcp.quick.from_object')
+    @patch('makemcp.quick.from_object')
     def test_run_with_dict(self, mock_from_object):
         """Test run() with dictionary."""
         mock_server = Mock()
@@ -304,7 +304,7 @@ class TestRun:
             mock_from_object.assert_called_once_with(functions, name="dict-server")
             mock_server.run.assert_called_once()
     
-    @patch('quickmcp.quick.from_object')
+    @patch('makemcp.quick.from_object')
     def test_run_with_function(self, mock_from_object):
         """Test run() with single function."""
         mock_server = Mock()
@@ -321,7 +321,7 @@ class TestRun:
             assert isinstance(call_args, dict)
             assert "test_func" in call_args
     
-    @patch('quickmcp.quick.from_object')
+    @patch('makemcp.quick.from_object')
     def test_run_with_transport_options(self, mock_from_object):
         """Test run() with transport options."""
         mock_server = Mock()
@@ -345,7 +345,7 @@ class TestIntegration:
         # Create a test module
         test_file = tmp_path / "workflow_test.py"
         test_file.write_text("""
-from quickmcp.factory import mcp_tool
+from makemcp.factory import mcp_tool
 
 def regular_func(x: int) -> int:
     return x * 2

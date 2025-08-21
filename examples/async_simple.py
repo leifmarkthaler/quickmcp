@@ -13,7 +13,7 @@ import json
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from quickmcp.factory import MCPFactory, create_mcp_from_module, mcp_tool
+from mcplite.factory import MCPFactory, create_mcp_from_module, mcp_tool
 
 
 # Simple async functions

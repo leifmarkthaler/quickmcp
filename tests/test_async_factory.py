@@ -8,8 +8,8 @@ import tempfile
 from pathlib import Path
 import sys
 
-from quickmcp.factory import MCPFactory, create_mcp_from_module, mcp_tool
-from quickmcp import QuickMCPServer
+from makemcp.factory import MCPFactory, create_mcp_from_module, mcp_tool
+from makemcp import MakeMCPServer
 
 
 ASYNC_MODULE_CODE = '''
@@ -67,7 +67,7 @@ DECORATED_ASYNC_CODE = '''
 """Module with decorated async functions."""
 
 import asyncio
-from quickmcp.factory import mcp_tool
+from makemcp.factory import mcp_tool
 
 @mcp_tool
 async def decorated_async(x: int) -> int:

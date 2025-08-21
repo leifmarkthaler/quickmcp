@@ -25,7 +25,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import json
 import random
-from quickmcp import QuickMCPServer, Context
+from mcplite import QuickMCPServer, Context
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Advanced QuickMCP Server")

@@ -4,7 +4,7 @@ Tests for QuickMCP async functionality
 
 import pytest
 import asyncio
-from quickmcp import QuickMCPServer
+from makemcp import MakeMCPServer
 
 
 class TestAsyncTools:
@@ -13,7 +13,7 @@ class TestAsyncTools:
     @pytest.mark.asyncio
     async def test_register_async_tool(self):
         """Test registering an async tool."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         @server.tool()
         async def async_tool(x: int) -> int:
@@ -31,7 +31,7 @@ class TestAsyncTools:
     @pytest.mark.asyncio
     async def test_multiple_async_tools(self):
         """Test multiple async tools."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         @server.tool()
         async def fetch_data(id: str) -> dict:
@@ -61,7 +61,7 @@ class TestAsyncTools:
     @pytest.mark.asyncio
     async def test_async_tool_with_error(self):
         """Test async tool error handling."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         @server.tool()
         async def failing_async_tool(value: int) -> int:
@@ -82,7 +82,7 @@ class TestAsyncTools:
     @pytest.mark.asyncio
     async def test_concurrent_async_tools(self):
         """Test running async tools concurrently."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         call_count = 0
         
@@ -113,7 +113,7 @@ class TestAsyncResources:
     @pytest.mark.asyncio
     async def test_register_async_resource(self):
         """Test registering an async resource."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         @server.resource("async://{id}")
         async def async_resource(id: str) -> str:
@@ -131,7 +131,7 @@ class TestAsyncResources:
     @pytest.mark.asyncio
     async def test_async_resource_with_processing(self):
         """Test async resource with data processing."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         # Simulate async data source
         async def fetch_from_database(key: str) -> dict:
@@ -161,7 +161,7 @@ class TestAsyncPrompts:
     @pytest.mark.asyncio
     async def test_register_async_prompt(self):
         """Test registering an async prompt."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         @server.prompt()
         async def async_prompt(topic: str) -> str:
@@ -179,7 +179,7 @@ class TestAsyncPrompts:
     @pytest.mark.asyncio
     async def test_async_prompt_with_external_data(self):
         """Test async prompt that fetches external data."""
-        server = QuickMCPServer("async-test-server")
+        server = MakeMCPServer("async-test-server")
         
         async def fetch_context(topic: str) -> str:
             """Simulate fetching context."""
@@ -203,7 +203,7 @@ class TestMixedSyncAsync:
     @pytest.mark.asyncio
     async def test_mixed_tools(self):
         """Test server with both sync and async tools."""
-        server = QuickMCPServer("mixed-server")
+        server = MakeMCPServer("mixed-server")
         
         @server.tool()
         def sync_tool(x: int) -> int:
@@ -231,7 +231,7 @@ class TestMixedSyncAsync:
     @pytest.mark.asyncio
     async def test_mixed_all_components(self):
         """Test server with mixed sync/async tools, resources, and prompts."""
-        server = QuickMCPServer("mixed-server")
+        server = MakeMCPServer("mixed-server")
         
         # Sync tool
         @server.tool()

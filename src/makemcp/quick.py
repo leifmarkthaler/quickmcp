@@ -1,22 +1,22 @@
 """
-QuickMCP - Super Simple API
+MakeMCP - Super Simple API
 The easiest way to create MCP servers.
 """
 
 from typing import Optional, Any, Callable
 from pathlib import Path
 
-from .server import QuickMCPServer
+from .server import MakeMCPServer
 from .factory import create_mcp_from_module as _create_from_module
 from .factory import MCPFactory, FactoryConfig
 
 
-def server(name: str = "quickmcp-server") -> QuickMCPServer:
+def server(name: str = "makemcp-server") -> MakeMCPServer:
     """
     Create a new MCP server with zero configuration.
     
     Example:
-        from quickmcp.quick import server
+        from makemcp.quick import server
         
         app = server("my-app")
         
@@ -26,19 +26,19 @@ def server(name: str = "quickmcp-server") -> QuickMCPServer:
         
         app.run()
     """
-    return QuickMCPServer(name)
+    return MakeMCPServer(name)
 
 
 def from_file(
     file_path: str,
     name: Optional[str] = None,
     include_private: bool = False
-) -> QuickMCPServer:
+) -> MakeMCPServer:
     """
     Create an MCP server from any Python file instantly.
     
     Example:
-        from quickmcp.quick import from_file
+        from makemcp.quick import from_file
         
         # Turn any Python file into an MCP server
         app = from_file("my_utils.py")
@@ -73,12 +73,12 @@ def from_file(
     )
 
 
-def from_object(obj: Any, name: Optional[str] = None) -> QuickMCPServer:
+def from_object(obj: Any, name: Optional[str] = None) -> MakeMCPServer:
     """
     Create an MCP server from any Python object (module, class, or dict).
     
     Example:
-        from quickmcp.quick import from_object
+        from makemcp.quick import from_object
         import math
         
         # From a module
@@ -115,14 +115,14 @@ def from_object(obj: Any, name: Optional[str] = None) -> QuickMCPServer:
 
 def run(
     func_or_file: Optional[Any] = None,
-    name: str = "quickmcp-server",
+    name: str = "makemcp-server",
     **kwargs
 ):
     """
     The simplest way to run an MCP server.
     
     Example:
-        from quickmcp.quick import run
+        from makemcp.quick import run
         
         # Run current file as server
         run(__file__)
@@ -134,7 +134,7 @@ def run(
         })
         
         # Run with decorators in current file
-        from quickmcp.quick import run, tool
+        from makemcp.quick import run, tool
         
         @tool
         def greet(name: str) -> str:
@@ -188,7 +188,7 @@ def tool(func: Optional[Callable] = None, *, name: Optional[str] = None, descrip
     Simple decorator to mark a function as an MCP tool.
     
     Example:
-        from quickmcp.quick import tool, run
+        from makemcp.quick import tool, run
         
         @tool
         def hello(name: str) -> str:

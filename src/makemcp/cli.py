@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-QuickMCP CLI - Command line interface for QuickMCP
+MakeMCP CLI - Command line interface for MakeMCP
 """
 
 import argparse
@@ -14,7 +14,7 @@ from .autodiscovery import discover_servers
 
 
 def cmd_register(args):
-    """Register a QuickMCP server."""
+    """Register a MakeMCP server."""
     command = args.command.split() if isinstance(args.command, str) else args.command
     
     register_server(
@@ -28,7 +28,7 @@ def cmd_register(args):
 
 
 def cmd_unregister(args):
-    """Unregister a QuickMCP server."""
+    """Unregister a MakeMCP server."""
     registry = ServerRegistry()
     if registry.unregister(args.name):
         print(f"✓ Unregistered server: {args.name}")
@@ -38,7 +38,7 @@ def cmd_unregister(args):
 
 
 def cmd_list(args):
-    """List registered QuickMCP servers."""
+    """List registered MakeMCP servers."""
     registry = ServerRegistry()
     servers = registry.list()
     
@@ -46,7 +46,7 @@ def cmd_list(args):
         print("No servers registered.")
         return
     
-    print(f"Registered QuickMCP servers ({len(servers)}):")
+    print(f"Registered MakeMCP servers ({len(servers)}):")
     print("-" * 60)
     
     for server in servers:
@@ -70,8 +70,8 @@ def cmd_list(args):
 
 
 def cmd_discover(args):
-    """Discover QuickMCP servers."""
-    print("Discovering QuickMCP servers...")
+    """Discover MakeMCP servers."""
+    print("Discovering MakeMCP servers...")
     
     # Discover in filesystem
     if args.scan_filesystem:
@@ -161,7 +161,7 @@ def cmd_info(args):
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        description="QuickMCP CLI - Manage and discover MCP servers"
+        description="MakeMCP CLI - Manage and discover MCP servers"
     )
     
     subparsers = parser.add_subparsers(dest="command", help="Commands")
@@ -188,7 +188,7 @@ def main():
     discover_parser = subparsers.add_parser("discover", help="Discover servers")
     discover_parser.add_argument(
         "--scan-filesystem", action="store_true",
-        help="Scan filesystem for QuickMCP servers"
+        help="Scan filesystem for MakeMCP servers"
     )
     discover_parser.add_argument(
         "--scan-network", action="store_true",

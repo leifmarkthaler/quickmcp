@@ -1,11 +1,11 @@
-# QuickMCP Examples
+# MakeMCP Examples
 
-This directory contains example QuickMCP servers demonstrating various features and use cases.
+This directory contains example MakeMCP servers demonstrating various features and use cases.
 
 ## Available Examples
 
 ### 1. Simple Server (`simple_server.py`)
-A minimal example showing the basic QuickMCP API with simple tools, resources, and prompts.
+A minimal example showing the basic MakeMCP API with simple tools, resources, and prompts.
 
 **Features:**
 - Basic tool registration
@@ -19,7 +19,7 @@ python examples/simple_server.py
 ```
 
 ### 2. Advanced Server (`advanced_server.py`)
-Comprehensive example showcasing advanced QuickMCP features.
+Comprehensive example showcasing advanced MakeMCP features.
 
 **Features:**
 - Complex tool schemas
@@ -108,7 +108,7 @@ python examples/autodiscovery_server.py --no-discovery
 ```
 
 ### 6. Discovery Client (`discover_servers.py`)
-Tool for discovering QuickMCP servers on the network.
+Tool for discovering MakeMCP servers on the network.
 
 **Features:**
 - Find servers on local network
@@ -220,6 +220,6 @@ When building servers that access system resources:
 ## Support
 
 For more information:
-- [QuickMCP Documentation](https://github.com/leifmarkthaler/quickmcp)
+- [MakeMCP Documentation](https://github.com/leifmarkthaler/makemcp)
 - [MCP Specification](https://modelcontextprotocol.io)
 - [Gleitzeit Integration](https://github.com/leifmarkthaler/gleitzeit)
